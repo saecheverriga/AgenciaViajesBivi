@@ -247,8 +247,8 @@
                                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
                             >
                                 {photos.map((photo, index) => (
-                                    <div key={index} className="min-w-[85vw] sm:min-w-[320px] h-[400px] sm:h-[450px] flex-shrink-0 snap-center rounded-2xl overflow-hidden shadow-2xl transform transition duration-300 hover:scale-105 relative cursor-pointer group/card">
-                                        <img src={photo} alt={`Destino popular ${index + 1}`} className="w-full h-full object-cover transition duration-500 group-hover/card:scale-110" loading="lazy" />
+                                    <div key={index} className="min-w-[80vw] aspect-[9/16] sm:min-w-[320px] sm:h-[450px] sm:aspect-auto flex-shrink-0 snap-center rounded-2xl overflow-hidden shadow-2xl transform transition duration-300 hover:scale-105 relative cursor-pointer group/card bg-black">
+                                        <img src={photo} alt={`Destino popular ${index + 1}`} className="w-full h-full object-cover sm:object-cover object-contain transition duration-500 group-hover/card:scale-110" loading="lazy" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 flex items-end p-6">
                                             <div>
                                                 <div className="bg-cyan-500 text-white text-xs font-bold px-2 py-1 rounded mb-2 inline-block">POPULAR</div>
