@@ -342,7 +342,8 @@
                             <div className="relative">
                                 {/* IMAGEN ACERCA DE: Actualizada para usar carpeta web_images */}
                                 <img src="./web_images/acercade_pic.jpg" alt="Equipo Viento Fresco" className="rounded-lg shadow-2xl z-10 relative" />
-                                <div className="absolute -bottom-6 -right-6 bg-cyan-500 text-white p-6 rounded-lg shadow-xl hidden md:block">
+                                {/* CORRECCIÓN: Se agregó 'z-20' para asegurar que este cuadro quede ENCIMA de la imagen */}
+                                <div className="absolute -bottom-6 -right-6 bg-cyan-500 text-white p-6 rounded-lg shadow-xl hidden md:block z-20">
                                     <p className="text-3xl font-bold">19+</p>
                                     <p className="text-sm">Años de Experiencia</p>
                                 </div>
