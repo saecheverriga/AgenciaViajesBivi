@@ -30,6 +30,13 @@
             background-position: center;
             background-attachment: fixed;
         }
+        /* CORRECCIÓN MÓVIL: Desactivar efecto fijo en pantallas pequeñas para evitar errores de renderizado */
+        @media (max-width: 768px) {
+            .hero-bg {
+                background-attachment: scroll;
+            }
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
