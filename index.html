@@ -55,14 +55,14 @@
 
         /* --- ESTILOS DEL CARRUSEL 3D --- */
         .carousel-3d-section {
-            padding: 40px 0 120px;
+            padding: 40px 0 180px; /* AUMENTADO: de 120px a 180px para que quepa el texto de ayuda */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #fff;
             overflow: hidden;
-            min-height: 650px; /* Un poco más alto para separar bien */
+            min-height: 650px; 
             position: relative;
         }
 
@@ -114,6 +114,7 @@
             justify-content: center;
             gap: 40px;
             pointer-events: none; 
+            z-index: 10; /* Asegura que los controles estén encima */
         }
 
         .controls-3d button {
@@ -389,9 +390,13 @@
                             ))}
                         </div>
                         <div className="controls-3d">
-                            <button onClick={() => rotate(1)} aria-label="Anterior">‹</button>
-                            <button onClick={() => rotate(-1)} aria-label="Siguiente">›</button>
+                            <button onClick={() => rotate(1)} aria-label="Anterior">←</button>
+                            <button onClick={() => rotate(-1)} aria-label="Siguiente">→</button>
                         </div>
+                        {/* NUEVO: Indicación de interacción - Ajustada posición y z-index */}
+                        <p className="absolute -bottom-[130px] w-full text-center text-cyan-200/80 text-sm font-light tracking-wide pointer-events-none z-10">
+                            <span className="inline-block mr-1 text-lg">👆</span> Haz clic en la imagen para ver detalles
+                        </p>
                     </div>
 
                     {lightboxSrc && (
