@@ -33,7 +33,7 @@
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
-            height: 10px; /* Altura para scrollbar horizontal */
+            height: 10px; 
         }
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
@@ -45,20 +45,136 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #0097a7;
         }
-        /* Ocultar scrollbar para el carrusel pero mantener funcionalidad */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
         .fade-in {
             animation: fadeIn 1s ease-in;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ESTILOS DEL CARRUSEL 3D --- */
+        .carousel-3d-section {
+            padding: 40px 0 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            overflow: hidden;
+            min-height: 650px; /* Un poco más alto para separar bien */
+            position: relative;
+        }
+
+        .carousel-wrapper {
+            perspective: 1200px;
+            width: 360px;
+            height: 270px;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        .carousel-3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+            left: 0;
+            top: 0;
+        }
+
+        .slide-3d {
+            position: absolute;
+            width: 360px;
+            height: 270px;
+            border: 1px solid #ffffff30; /* Borde sutil */
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.5s, opacity 0.5s;
+            cursor: zoom-in;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #222;
+        }
+
+        .slide-3d img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none; 
+        }
+
+        .controls-3d {
+            position: absolute;
+            bottom: -90px; 
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            pointer-events: none; 
+        }
+
+        .controls-3d button {
+            pointer-events: auto;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 26px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transition: transform 0.15s ease, background 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .controls-3d button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Lightbox específico */
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        .lightbox-image {
+            max-width: 92%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 28px;
+            right: 36px;
+            font-size: 48px;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            line-height: 1;
+            user-select: none;
+            z-index: 10000;
+        }
+
+        @media (max-width: 420px) {
+            .carousel-wrapper { width: 300px; height: 225px; }
+            .slide-3d { width: 300px; height: 225px; }
         }
     </style>
 </head>
@@ -68,26 +184,10 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICON COMPONENTS (Inline SVG fix) ---
-        // Definimos los iconos manualmente para evitar errores de carga de librerías externas
-
+        // --- ICON COMPONENTS ---
         const IconWrapper = ({ children, className }) => (
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className={className}
-            >
-                {children}
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
         );
-
         const MapPin = ({ className }) => <IconWrapper className={className}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></IconWrapper>;
         const Phone = ({ className }) => <IconWrapper className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></IconWrapper>;
         const Mail = ({ className }) => <IconWrapper className={className}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></IconWrapper>;
@@ -95,32 +195,21 @@
         const Star = ({ className }) => <IconWrapper className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconWrapper>;
         const CheckCircle = ({ className }) => <IconWrapper className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconWrapper>;
         const ShieldCheck = ({ className }) => <IconWrapper className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></IconWrapper>;
-        const Plane = ({ className }) => <IconWrapper className={className}><path d="M2 22h20"/><path d="M13 2L2 14h10l-2 8 11-10H11l2-10z"/></IconWrapper>;
+        const Plane = ({ className }) => <IconWrapper className={className}><path d="M22 22h20"/><path d="M13 2L2 14h10l-2 8 11-10H11l2-10z"/></IconWrapper>;
         const Users = ({ className }) => <IconWrapper className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
         const Heart = ({ className }) => <IconWrapper className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></IconWrapper>;
-        const ChevronLeft = ({ className }) => <IconWrapper className={className}><path d="m15 18-6-6 6-6"/></IconWrapper>;
-        const ChevronRight = ({ className }) => <IconWrapper className={className}><path d="m9 18 6-6-6-6"/></IconWrapper>;
-        const XIcon = ({ className }) => <IconWrapper className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconWrapper>;
 
         // --- COMPONENTES PRINCIPALES ---
 
         // Navbar
         const Navbar = ({ scrollToSection }) => {
-            // Estado para manejar el error de carga de la imagen del logo
             const [imageError, setImageError] = useState(false);
-
             return (
                 <nav className="bg-white shadow-md fixed w-full z-50 transition-all duration-300">
                     <div className="container mx-auto px-6 py-4 flex justify-between items-center">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
-                            {/* LOGO con manejo de estado para error */}
                             {!imageError ? (
-                                <img 
-                                    src="./web_images/logo.png" 
-                                    alt="Logo Viento Fresco" 
-                                    className="h-12 w-auto object-contain" 
-                                    onError={() => setImageError(true)} 
-                                />
+                                <img src="./web_images/logo.png" alt="Logo" className="h-12 w-auto object-contain" onError={() => setImageError(true)} />
                             ) : (
                                 <Plane className="text-cyan-500 w-8 h-8" />
                             )}
@@ -128,12 +217,14 @@
                         </div>
                         <div className="hidden md:flex space-x-8">
                             <button onClick={() => scrollToSection('destacados')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Destacados</button>
-                            <button onClick={() => scrollToSection('servicios')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Categorías</button>
+                            <button onClick={() => scrollToSection('internacionales')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Internacional</button>
                             <button onClick={() => scrollToSection('nosotros')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Nosotros</button>
-                            <button onClick={() => scrollToSection('testimonios')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Confianza</button>
+                            <button onClick={() => scrollToSection('contacto')} className="bg-cyan-500 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-600 transition shadow-lg transform hover:scale-105">
+                                Cotizar
+                            </button>
                         </div>
-                        <button onClick={() => scrollToSection('contacto')} className="bg-cyan-500 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-600 transition shadow-lg transform hover:scale-105">
-                            Cotizar Viaje
+                        <button onClick={() => scrollToSection('contacto')} className="md:hidden bg-cyan-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                            Cotizar
                         </button>
                     </div>
                 </nav>
@@ -169,7 +260,7 @@
             </header>
         );
 
-        // Features / Trust Badge
+        // Features
         const Features = () => (
             <section className="py-12 bg-white">
                 <div className="container mx-auto px-6">
@@ -200,101 +291,117 @@
             </section>
         );
 
-        // --- CARRUSEL DE FOTOS + MODAL ---
-        const PhotoCarousel = () => {
-            const scrollRef = useRef(null);
-            const [selectedImage, setSelectedImage] = useState(null); // Estado para el modal
+        // --- COMPONENTE DE CARRUSEL 3D REUTILIZABLE ---
+        const Carousel3D = ({ id, folder, filePrefix, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection }) => {
+            const [angle, setAngle] = useState(0);
+            const [lightboxSrc, setLightboxSrc] = useState(null);
+            const [images, setImages] = useState([]); 
 
-            const photos = [
-                "./viajes/viaje1.jpg", 
-                "./viajes/viaje2.jpg", 
-                "./viajes/viaje3.jpg", 
-                "./viajes/viaje4.jpg", 
-                "./viajes/viaje5.jpg", 
-                "./viajes/viaje6.jpg", 
-            ];
+            useEffect(() => {
+                const checkImages = async () => {
+                    const foundImages = [];
+                    let i = 1;
+                    let keepChecking = true;
+                    
+                    const loadImage = (url) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.onload = () => resolve(url);
+                            img.onerror = () => reject(url);
+                            img.src = url;
+                        });
+                    };
 
-            const scroll = (direction) => {
-                const { current } = scrollRef;
-                if (current) {
-                    const scrollAmount = direction === 'left' ? -300 : 300; 
-                    current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                }
+                    while (keepChecking && i <= 50) {
+                        const path = `./${folder}/${filePrefix}${i}.jpg`;
+                        try {
+                            await loadImage(path);
+                            foundImages.push(path);
+                            i++;
+                        } catch (error) {
+                            keepChecking = false; 
+                        }
+                    }
+                    
+                    // FALLBACKS (Solo para demo si no hay fotos reales)
+                    if (foundImages.length === 0) {
+                        // CORRECCIÓN: Ahora verifica si la carpeta es 'viajes' para mostrar las fotos de Colombia
+                        const fallbackBase = folder === 'viajes' 
+                            ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600" // Colombia fallback
+                            : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600"; // Paris/Intl fallback
+                        
+                        // Añadimos un par de fallbacks para que no se vea vacío el demo
+                        foundImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
+                    }
+                    
+                    setImages(foundImages);
+                };
+
+                checkImages();
+            }, [folder, filePrefix]);
+
+            const slideCount = images.length;
+            const theta = slideCount > 0 ? 360 / slideCount : 0;
+            const radius = Math.max(450, slideCount * 60);
+
+            const rotate = (dir) => {
+                setAngle(prevAngle => prevAngle + (dir * theta));
             };
 
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (lightboxSrc) {
+                        if (e.key === 'Escape') setLightboxSrc(null);
+                    } 
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [lightboxSrc]); 
+
+            if (slideCount === 0) return null;
+
             return (
-                <section id="destacados" className="py-20 bg-gray-900 relative overflow-hidden">
-                     <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" style={{backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")'}}></div>
-                    <div className="container mx-auto px-6 relative z-10">
-                        <div className="text-center mb-12">
-                            <h2 className="text-4xl font-bold text-white mb-4">Algunos de nuestros destinos más vendidos</h2>
-                            <p className="text-cyan-300 max-w-2xl mx-auto text-xl">Viajes en crecimiento al día de hoy</p>
+                <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle }}>
+                    <div className="text-center mb-8 px-6">
+                        <div className="inline-block bg-white/10 text-white font-semibold px-4 py-1 rounded-full text-sm mb-3 border border-white/30 backdrop-blur-sm">
+                            {badge}
                         </div>
-
-                        <div className="relative group">
-                            {/* Botón Izquierda */}
-                            <button 
-                                onClick={() => scroll('left')} 
-                                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg z-20 hidden group-hover:flex transition-all opacity-0 group-hover:opacity-100 -ml-5"
-                                aria-label="Anterior"
-                            >
-                                <ChevronLeft className="w-6 h-6" />
-                            </button>
-
-                            {/* Contenedor del Carrusel */}
-                            <div 
-                                ref={scrollRef}
-                                className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory no-scrollbar scroll-smooth"
-                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
-                            >
-                                {photos.map((photo, index) => (
-                                    // AJUSTE MOVIL: h-[50vh] para que no ocupe todo el alto, min-w-[70vw] para ver la siguiente foto
-                                    <div 
-                                        key={index} 
-                                        className="min-w-[70vw] h-[50vh] md:min-w-[320px] md:h-[450px] flex-shrink-0 snap-center rounded-2xl overflow-hidden shadow-2xl transform transition duration-300 hover:scale-105 relative cursor-pointer group/card bg-gray-800 border border-gray-700"
-                                        onClick={() => setSelectedImage(photo)} // Abre el modal al hacer clic
-                                    >
-                                        <img src={photo} alt={`Destino popular ${index + 1}`} className="w-full h-full object-cover transition duration-500 group-hover/card:scale-110" loading="lazy" />
-                                        
-                                        {/* Overlay con texto */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 flex items-end p-6">
-                                            <div>
-                                                <div className="bg-cyan-500 text-white text-xs font-bold px-2 py-1 rounded mb-2 inline-block">POPULAR</div>
-                                                <p className="text-white font-bold text-lg flex items-center gap-2">
-                                                    Ver más <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">+</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Botón Derecha */}
-                            <button 
-                                onClick={() => scroll('right')} 
-                                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg z-20 hidden group-hover:flex transition-all opacity-0 group-hover:opacity-100 -mr-5"
-                                aria-label="Siguiente"
-                            >
-                                <ChevronRight className="w-6 h-6" />
-                            </button>
-                        </div>
-                         <p className="text-center text-cyan-300/60 text-sm mt-4">Toca una imagen para ampliar</p>
+                        <h2 className="text-4xl font-bold text-white mb-4 leading-tight">{title}</h2>
+                        <p className="text-gray-200 max-w-2xl mx-auto text-lg">
+                            {subtitleStart} <button onClick={() => scrollToSection('contacto')} className="text-cyan-300 font-bold hover:text-white underline decoration-2 underline-offset-4 cursor-pointer bg-transparent border-none p-0 inline transition-colors">{linkText}</button> {subtitleEnd}
+                        </p>
                     </div>
 
-                    {/* MODAL (LIGHTBOX) PARA VER FOTO GRANDE */}
-                    {selectedImage && (
-                        <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4 fade-in" onClick={() => setSelectedImage(null)}>
-                            <button 
-                                className="absolute top-6 right-6 text-white bg-gray-800/50 p-2 rounded-full hover:bg-red-500 transition"
-                                onClick={() => setSelectedImage(null)}
-                            >
-                                <XIcon className="w-8 h-8" />
-                            </button>
+                    <div className="carousel-wrapper">
+                        <div 
+                            className="carousel-3d" 
+                            style={{ transform: `translateZ(-${radius - 50}px) rotateY(${angle}deg)` }}
+                        >
+                            {images.map((src, i) => (
+                                <div 
+                                    key={i} 
+                                    className="slide-3d" 
+                                    style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }}
+                                    onClick={() => setLightboxSrc(src)}
+                                >
+                                    <img src={src} alt={`Destino ${i + 1}`} loading="lazy" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="controls-3d">
+                            <button onClick={() => rotate(1)} aria-label="Anterior">‹</button>
+                            <button onClick={() => rotate(-1)} aria-label="Siguiente">›</button>
+                        </div>
+                    </div>
+
+                    {lightboxSrc && (
+                        <div className="lightbox-overlay" onClick={() => setLightboxSrc(null)}>
+                            <span className="close-lightbox" onClick={() => setLightboxSrc(null)}>×</span>
                             <img 
-                                src={selectedImage} 
-                                alt="Vista ampliada" 
-                                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                                onClick={(e) => e.stopPropagation()} // Evita cerrar si clickeas la imagen
+                                src={lightboxSrc} 
+                                alt="Imagen ampliada" 
+                                className="lightbox-image"
+                                onClick={(e) => e.stopPropagation()} 
                             />
                         </div>
                     )}
@@ -302,7 +409,7 @@
             );
         };
 
-        // Services / Destinations
+        // Services
         const Services = () => {
             const categories = [
                 {
@@ -364,16 +471,15 @@
             );
         };
 
-        // About / Biviana Section
+        // About
         const About = () => (
             <section id="nosotros" className="py-20 bg-white">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row items-center gap-12">
                         <div className="md:w-1/2">
                             <div className="relative">
-                                {/* IMAGEN ACERCA DE: Actualizada para usar carpeta web_images */}
+                                {/* IMAGEN ACERCA DE */}
                                 <img src="./web_images/acercade_pic.jpg" alt="Equipo Viento Fresco" className="rounded-lg shadow-2xl z-10 relative" />
-                                {/* CORRECCIÓN: Se agregó 'z-20' para asegurar que este cuadro quede ENCIMA de la imagen */}
                                 <div className="absolute -bottom-6 -right-6 bg-cyan-500 text-white p-6 rounded-lg shadow-xl hidden md:block z-20">
                                     <p className="text-3xl font-bold">19+</p>
                                     <p className="text-sm">Años de Experiencia</p>
@@ -400,7 +506,7 @@
             </section>
         );
 
-        // Testimonial Section
+        // Testimonials
         const Testimonials = () => (
             <section id="testimonios" className="py-20 bg-cyan-900 text-white relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
@@ -428,9 +534,8 @@
             </section>
         );
 
-        // Contact Form Section - ESTRATEGIA HÍBRIDA (WHATSAPP + FORM)
+        // Contact
         const Contact = () => {
-            // Se usa useEffect para cargar el script de Tally de manera que React no tenga conflictos
             useEffect(() => {
                 const d = document;
                 const w = "https://tally.so/widgets/embed.js";
@@ -460,8 +565,6 @@
                 <section id="contacto" className="py-20 bg-gray-100">
                     <div className="container mx-auto px-6">
                         <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-                            
-                            {/* Columna Izquierda: Acción Rápida (WhatsApp + Datos) */}
                             <div className="md:w-5/12 bg-cyan-600 text-white p-10 flex flex-col justify-between">
                                 <div>
                                     <h3 className="text-3xl font-bold mb-4">¡Hablemos ahora!</h3>
@@ -469,7 +572,6 @@
                                         ¿Tienes dudas o quieres una cotización rápida? La forma más ágil de contactarme es por WhatsApp. Estoy lista para asesorarte.
                                     </p>
                                     
-                                    {/* Botón Gigante de WhatsApp */}
                                     <a 
                                         href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20web%20y%20quiero%20cotizar%20un%20viaje." 
                                         target="_blank"
@@ -498,7 +600,6 @@
                                 </div>
                             </div>
                             
-                            {/* Columna Derecha: Formulario Formal */}
                             <div className="md:w-7/12 p-10 bg-gray-50">
                                 <div className="mb-6">
                                     <h3 className="text-2xl font-bold text-gray-800">Solicitud Formal</h3>
@@ -525,7 +626,7 @@
             );
         };
 
-        // WhatsApp Floating Button
+        // WhatsApp Button
         const WhatsAppButton = () => (
             <a 
                 href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20página%20web%20de%20Viento%20Fresco%20y%20quiero%20información." 
@@ -553,7 +654,6 @@
 
         // Main App Component
         const App = () => {
-            // HERO IMAGE: Actualizada para usar carpeta web_images
             const heroImage = "./web_images/intro.jpg"; 
 
             const scrollToSection = (id) => {
@@ -568,7 +668,35 @@
                     <Navbar scrollToSection={scrollToSection} />
                     <Hero scrollToSection={scrollToSection} heroImage={heroImage} /> 
                     <Features />
-                    <PhotoCarousel /> 
+                    
+                    {/* SECCIÓN NACIONAL */}
+                    <Carousel3D 
+                        id="destacados"
+                        folder="viajes" /* CORREGIDO: Antes decía "videos" */
+                        filePrefix="viaje" /* CORREGIDO: Antes decía "imagen" */
+                        badge="🇨🇴 SECCIÓN DE VIAJES NACIONALES"
+                        title="Destinos Nacionales Más Populares"
+                        subtitleStart="Estos son algunos de los viajes más vendidos. ¿Buscas otro destino en Colombia?"
+                        linkText="Escríbenos"
+                        subtitleEnd="y te ayudamos."
+                        backgroundStyle="linear-gradient(to bottom, #0f172a, #155e75)" /* Azul Oscuro - Cyan */
+                        scrollToSection={scrollToSection}
+                    />
+
+                    {/* SECCIÓN INTERNACIONAL (NUEVA) */}
+                    <Carousel3D 
+                        id="internacionales"
+                        folder="viajes_int" 
+                        filePrefix="viaje"
+                        badge="🌎 SECCIÓN DE VIAJES INTERNACIONALES"
+                        title="Destinos Internacionales Más Solicitados"
+                        subtitleStart="Explora nuestras opciones destacadas. Si buscas otro país o ciudad,"
+                        linkText="¡pregúntanos!"
+                        subtitleEnd="Tenemos más destinos disponibles."
+                        backgroundStyle="linear-gradient(to bottom, #1e1b4b, #312e81)" /* Índigo Profundo (Morado) - Complementario */
+                        scrollToSection={scrollToSection}
+                    />
+
                     <Services />
                     <About />
                     <Testimonials />
