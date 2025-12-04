@@ -3,8 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viento Fresco | Asesoría de Viajes con Biviana</title>
     
+    <!-- SEO META TAGS -->
+    <title>Viento Fresco | Agencia de Viajes en Colombia y el Mundo - Asesoría Biviana</title>
+    <meta name="description" content="Descubre los mejores destinos nacionales e internacionales con Viento Fresco. Asesoría personalizada en Medellín para viajes a San Andrés, Cancún, Europa, Quinceañeras y más. ¡Cotiza tu viaje soñado con Biviana!">
+    <meta name="keywords" content="agencia de viajes medellin, turismo colombia, viajes san andres, tours europa, paquetes turisticos, excursiones quinceañeras, luna de miel, viajes baratos, asesoría de viajes biviana">
+    <meta name="author" content="Viento Fresco - Biviana">
+    <meta name="robots" content="index, follow">
+    
+    <!-- OPEN GRAPH (Para que se vea bonito al compartir en Facebook/WhatsApp) -->
+    <meta property="og:title" content="Viento Fresco | Viajes Inolvidables con Asesoría Personalizada">
+    <meta property="og:description" content="Planea tus próximas vacaciones con seguridad y confianza. Destinos nacionales e internacionales con el respaldo de 19 años de experiencia.">
+    <meta property="og:image" content="./web_images/intro.jpg"> <!-- Asegúrate de que esta imagen sea atractiva -->
+    <meta property="og:url" content="https://tu-usuario.github.io/viajes-viento-fresco"> <!-- Reemplazar con tu URL final -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_CO">
+
+    <!-- TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Viento Fresco | Tu Agencia de Viajes de Confianza">
+    <meta name="twitter:description" content="Viaja sin preocupaciones. Asesoría experta para tus vacaciones en Colombia y el mundo.">
+    <meta name="twitter:image" content="./web_images/intro.jpg">
+
     <!-- React y ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -423,7 +443,7 @@
                                     style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }}
                                     onClick={() => setLightboxSrc(src)}
                                 >
-                                    <img src={src} alt={`Destino ${i + 1}`} loading="lazy" />
+                                    <img src={src} alt={`${title} - Imagen ${i + 1}`} loading="lazy" />
                                 </div>
                             ))}
                         </div>
@@ -442,7 +462,7 @@
                             <span className="close-lightbox" onClick={() => setLightboxSrc(null)}>×</span>
                             <img 
                                 src={lightboxSrc} 
-                                alt="Imagen ampliada" 
+                                alt={`Imagen ampliada de ${title}`} 
                                 className="lightbox-image"
                                 onClick={(e) => e.stopPropagation()} 
                             />
