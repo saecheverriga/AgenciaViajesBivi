@@ -333,50 +333,41 @@
             const [lightboxSrc, setLightboxSrc] = useState(null);
             const [images, setImages] = useState([]); 
             const [radius, setRadius] = useState(400); 
-            const [loading, setLoading] = useState(true); 
 
             useEffect(() => {
                 const checkImages = async () => {
-                    setLoading(true);
-                    const maxChecks = 50; // Buscar hasta la foto 50
+                    const foundImages = [];
+                    let i = 1;
+                    let keepChecking = true;
                     
-                    // Función para verificar si una imagen existe
-                    const checkImageExists = (index) => {
-                        const path = `./${folder}/${filePrefix}${index}.jpeg`; // SOLO BUSCA .jpeg
-                        return new Promise((resolve) => {
+                    const loadImage = (url) => {
+                        return new Promise((resolve, reject) => {
                             const img = new Image();
-                            img.onload = () => resolve(path);
-                            img.onerror = () => resolve(null); // Si falla, devuelve null (no rechaza)
-                            img.src = path;
+                            img.onload = () => resolve(url);
+                            img.onerror = () => reject(url);
+                            img.src = url;
                         });
                     };
 
-                    // Crear array de promesas para ejecutar en paralelo
-                    const promises = [];
-                    for (let i = 1; i <= maxChecks; i++) {
-                        promises.push(checkImageExists(i));
+                    while (keepChecking && i <= 50) {
+                        const path = `./${folder}/${filePrefix}${i}.jpeg`;
+                        try {
+                            await loadImage(path);
+                            foundImages.push(path);
+                            i++;
+                        } catch (error) {
+                            keepChecking = false; 
+                        }
                     }
-
-                    // Esperar a que todas las verificaciones terminen
-                    const results = await Promise.all(promises);
                     
-                    // Filtrar solo las rutas válidas (no null)
-                    let validImages = results.filter(path => path !== null);
-
-                    // FALLBACKS (Solo si no hay NINGUNA foto real)
-                    if (validImages.length === 0) {
+                    if (foundImages.length === 0) {
                         const fallbackBase = folder === 'viajes' 
                             ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
                             : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600";
-                        
-                        // Rellenar con fallbacks
-                        validImages = [fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase];
+                        foundImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
                     }
-                    
-                    setImages(validImages);
-                    setLoading(false);
+                    setImages(foundImages);
                 };
-
                 checkImages();
             }, [folder, filePrefix]);
 
@@ -414,16 +405,6 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
-            // Si está cargando, mostrar mensaje en lugar de ocultar
-            if (loading) {
-                return (
-                    <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle, minHeight: '400px' }}>
-                        <div className="text-white text-xl animate-pulse">Cargando galería...</div>
-                    </section>
-                );
-            }
-            
-            // Si no hay imágenes (ni fallbacks), ocultar, pero esto es improbable con el fallback
             if (slideCount === 0) return null;
 
             return (
