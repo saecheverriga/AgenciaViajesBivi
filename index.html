@@ -1,310 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viento Fresco | Asesoría de Viajes con Biviana</title>
-    
-    <!-- React y ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel para JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Montserrat', sans-serif;
-        }
-        .hero-bg {
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        /* CORRECCIÓN MÓVIL: Desactivar efecto fijo en pantallas pequeñas para evitar errores de renderizado */
-        @media (max-width: 768px) {
-            .hero-bg {
-                background-attachment: scroll;
-            }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px; 
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #00bcd4;
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #0097a7;
-        }
-        .fade-in {
-            animation: fadeIn 1s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- ESTILOS DEL CARRUSEL 3D --- */
-        .carousel-3d-section {
-            padding: 40px 0 180px; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            overflow: hidden;
-            min-height: 850px; /* AUMENTADO: Para acomodar las fotos verticales altas */
-            position: relative;
-        }
-
-        .carousel-wrapper {
-            perspective: 1200px;
-            width: 300px;  /* CAMBIO: Ancho más angosto */
-            height: 533px; /* CAMBIO: Altura para relación de aspecto 9:16 */
-            position: relative;
-            margin-top: 30px;
-        }
-
-        .carousel-3d {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            transform-style: preserve-3d;
-            transition: transform 0.6s ease;
-            left: 0;
-            top: 0;
-        }
-
-        .slide-3d {
-            position: absolute;
-            width: 300px;  /* CAMBIO: Igual al wrapper */
-            height: 533px; /* CAMBIO: Igual al wrapper */
-            border: 1px solid #ffffff30; 
-            border-radius: 12px; /* Un poco más redondeado para estética móvil */
-            overflow: hidden;
-            transition: transform 0.5s, opacity 0.5s;
-            cursor: zoom-in;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            background: #222;
-        }
-
-        .slide-3d img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            pointer-events: none; 
-        }
-
-        .controls-3d {
-            position: absolute;
-            bottom: -90px; 
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            pointer-events: none; 
-            z-index: 10; 
-        }
-
-        .controls-3d button {
-            pointer-events: auto;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 26px;
-            background: rgba(255,255,255,0.15);
-            color: white;
-            transition: transform 0.15s ease, background 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-        }
-
-        .controls-3d button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-3px);
-        }
-
-        /* Lightbox específico */
-        .lightbox-overlay {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.95);
-            z-index: 9999;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
-        }
-
-        .lightbox-image {
-            max-width: 92%;
-            max-height: 90%;
-            border-radius: 8px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-        }
-
-        .close-lightbox {
-            position: absolute;
-            top: 28px;
-            right: 36px;
-            font-size: 48px;
-            color: white;
-            cursor: pointer;
-            font-weight: 700;
-            line-height: 1;
-            user-select: none;
-            z-index: 10000;
-        }
-
-        @media (max-width: 420px) {
-            /* AJUSTE MÓVIL: Escala proporcional 9:16 para celulares */
-            .carousel-wrapper { width: 260px; height: 462px; }
-            .slide-3d { width: 260px; height: 462px; }
-        }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-800">
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // --- ICON COMPONENTS ---
-        const IconWrapper = ({ children, className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
-        );
-        const MapPin = ({ className }) => <IconWrapper className={className}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></IconWrapper>;
-        const Phone = ({ className }) => <IconWrapper className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></IconWrapper>;
-        const Mail = ({ className }) => <IconWrapper className={className}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></IconWrapper>;
-        const Calendar = ({ className }) => <IconWrapper className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></IconWrapper>;
-        const Star = ({ className }) => <IconWrapper className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconWrapper>;
-        const CheckCircle = ({ className }) => <IconWrapper className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconWrapper>;
-        const ShieldCheck = ({ className }) => <IconWrapper className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></IconWrapper>;
-        const Plane = ({ className }) => <IconWrapper className={className}><path d="M22 22h20"/><path d="M13 2L2 14h10l-2 8 11-10H11l2-10z"/></IconWrapper>;
-        const Users = ({ className }) => <IconWrapper className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
-        const Heart = ({ className }) => <IconWrapper className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></IconWrapper>;
-
-        // --- COMPONENTES PRINCIPALES ---
-
-        // Navbar
-        const Navbar = ({ scrollToSection }) => {
-            const [imageError, setImageError] = useState(false);
-            return (
-                <nav className="bg-white shadow-md fixed w-full z-50 transition-all duration-300">
-                    <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
-                            {!imageError ? (
-                                <img src="./web_images/logo.png" alt="Logo" className="h-12 w-auto object-contain" onError={() => setImageError(true)} />
-                            ) : (
-                                <Plane className="text-cyan-500 w-8 h-8" />
-                            )}
-                            <span className="text-xl font-bold text-gray-800 tracking-wider">VIENTO FRESCO</span>
-                        </div>
-                        <div className="hidden md:flex space-x-8">
-                            <button onClick={() => scrollToSection('destacados')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Destacados</button>
-                            <button onClick={() => scrollToSection('internacionales')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Internacional</button>
-                            <button onClick={() => scrollToSection('nosotros')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Nosotros</button>
-                            <button onClick={() => scrollToSection('contacto')} className="bg-cyan-500 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-600 transition shadow-lg transform hover:scale-105">
-                                Cotizar
-                            </button>
-                        </div>
-                        <button onClick={() => scrollToSection('contacto')} className="md:hidden bg-cyan-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                            Cotizar
-                        </button>
-                    </div>
-                </nav>
-            );
-        };
-
-        // Hero Section
-        const Hero = ({ scrollToSection, heroImage }) => (
-            <header id="hero" className="relative h-screen flex items-center justify-center text-center text-white hero-bg" style={{backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('${heroImage}')`}}>
-                <div className="container mx-auto px-6 fade-in">
-                    <div className="mb-4 inline-block bg-cyan-500 px-4 py-1 rounded-full text-sm font-semibold uppercase tracking-wider">
-                        Agencia de Viajes & Turismo
-                    </div>
-                    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                        Descubre el Mundo <br/> <span className="text-cyan-400">Sin Preocupaciones</span>
-                    </h1>
-                    <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto font-light">
-                        19 años cumpliendo sueños. Asesoría personalizada y segura con Biviana, tu enlace de confianza con Viento Fresco.
-                    </p>
-                    <div className="flex flex-col md:flex-row gap-4 justify-center">
-                        <button onClick={() => scrollToSection('contacto')} className="bg-cyan-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-cyan-600 transition shadow-lg flex items-center justify-center gap-2">
-                            <Calendar className="w-5 h-5" /> Planear mi Viaje
-                        </button>
-                        <button onClick={() => scrollToSection('destacados')} className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-cyan-600 transition flex items-center justify-center gap-2">
-                            <MapPin className="w-5 h-5" /> Ver Populares
-                        </button>
-                    </div>
-                </div>
-                
-                <div className="absolute bottom-10 animate-bounce">
-                    <span className="text-white text-sm">Descubre más</span>
-                </div>
-            </header>
-        );
-
-        // Features
-        const Features = () => (
-            <section className="py-12 bg-white">
-                <div className="container mx-auto px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                        <div className="p-6 rounded-xl hover:shadow-xl transition duration-300">
-                            <div className="bg-cyan-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-600">
-                                <ShieldCheck className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">100% Seguro y Confiable</h3>
-                            <p className="text-gray-600">Evita fraudes. Somos negociantes directos con operadores, garantizando tu inversión.</p>
-                        </div>
-                        <div className="p-6 rounded-xl hover:shadow-xl transition duration-300">
-                            <div className="bg-cyan-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-600">
-                                <Users className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Asesoría Personalizada</h3>
-                            <p className="text-gray-600">Biviana te acompaña antes, durante y después de tu viaje. No eres un número más.</p>
-                        </div>
-                        <div className="p-6 rounded-xl hover:shadow-xl transition duration-300">
-                            <div className="bg-cyan-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-600">
-                                <Heart className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Experiencias Inolvidables</h3>
-                            <p className="text-gray-600">Especialistas en lunas de miel, quinceañeras y excursiones familiares.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-
-        // --- COMPONENTE DE CARRUSEL 3D REUTILIZABLE ---
+// --- COMPONENTE DE CARRUSEL 3D REUTILIZABLE ---
         const Carousel3D = ({ id, folder, filePrefix, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection }) => {
             const [angle, setAngle] = useState(0);
             const [lightboxSrc, setLightboxSrc] = useState(null);
             const [images, setImages] = useState([]); 
+            const [radius, setRadius] = useState(400); // Valor inicial seguro
 
             useEffect(() => {
                 const checkImages = async () => {
@@ -334,12 +33,10 @@
                     
                     // FALLBACKS (Solo para demo si no hay fotos reales)
                     if (foundImages.length === 0) {
-                        // CORRECCIÓN: Ahora verifica si la carpeta es 'viajes' para mostrar las fotos de Colombia
                         const fallbackBase = folder === 'viajes' 
                             ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600" // Colombia fallback
                             : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600"; // Paris/Intl fallback
                         
-                        // Añadimos un par de fallbacks para que no se vea vacío el demo
                         foundImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
                     }
                     
@@ -351,11 +48,37 @@
 
             const slideCount = images.length;
             const theta = slideCount > 0 ? 360 / slideCount : 0;
-            const radius = Math.max(450, slideCount * 60);
 
             const rotate = (dir) => {
                 setAngle(prevAngle => prevAngle + (dir * theta));
             };
+
+            // LÓGICA DE RADIO INTELIGENTE
+            // Se actualiza cuando cambia el tamaño de pantalla O el número de imágenes
+            useEffect(() => {
+                const calculateRadius = () => {
+                    // 1. Radio base según el ancho de pantalla (para que se vea grande en PC)
+                    let baseRadius = window.innerWidth / 2;
+
+                    // 2. Radio mínimo necesario por cantidad de fotos (Anti-solapamiento)
+                    // Perímetro necesario ~= AnchoSlide (300px) * NumeroFotos
+                    // Radio necesario ~= Perímetro / (2 * PI)
+                    // Añadimos un factor de holgura (1.1)
+                    if (slideCount > 0) {
+                        const minRadiusForImages = (slideCount * 300) / (2 * Math.PI) * 1.1;
+                        // El radio nunca será menor a 340px (para móviles) ni menor a lo necesario por las fotos
+                        baseRadius = Math.max(baseRadius, minRadiusForImages, 340);
+                    } else {
+                        baseRadius = Math.max(baseRadius, 340);
+                    }
+
+                    setRadius(baseRadius);
+                };
+
+                calculateRadius();
+                window.addEventListener('resize', calculateRadius);
+                return () => window.removeEventListener('resize', calculateRadius);
+            }, [slideCount]);
 
             useEffect(() => {
                 const handleKeyDown = (e) => {
@@ -367,6 +90,7 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
+            // RENDERIZADO SEGURO: Si no hay imágenes, retornamos null DESPUÉS de todos los hooks
             if (slideCount === 0) return null;
 
             return (
@@ -384,7 +108,7 @@
                     <div className="carousel-wrapper">
                         <div 
                             className="carousel-3d" 
-                            style={{ transform: `translateZ(-${radius - 50}px) rotateY(${angle}deg)` }}
+                            style={{ transform: `translateZ(-${radius}px) rotateY(${angle}deg)` }}
                         >
                             {images.map((src, i) => (
                                 <div 
@@ -401,7 +125,7 @@
                             <button onClick={() => rotate(1)} aria-label="Anterior">←</button>
                             <button onClick={() => rotate(-1)} aria-label="Siguiente">→</button>
                         </div>
-                        {/* NUEVO: Indicación de interacción - Ajustada posición y z-index */}
+                        {/* Indicación de interacción */}
                         <p className="absolute -bottom-[130px] w-full text-center text-cyan-200/80 text-sm font-light tracking-wide pointer-events-none z-10">
                             <span className="inline-block mr-1 text-lg">👆</span> Haz clic en la imagen para ver detalles
                         </p>
@@ -421,308 +145,3 @@
                 </section>
             );
         };
-
-        // Services
-        const Services = () => {
-            const categories = [
-                {
-                    title: "Regionales (Antioquia)",
-                    desc: "La magia cerca de casa.",
-                    items: ["Guatapé y la Piedra", "Medellín City Tour", "Hacienda Nápoles", "Eje Cafetero", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: "Nacionales (Colombia)",
-                    desc: "Paraísos en nuestro país.",
-                    items: ["San Andrés Islas", "Cartagena Histórica", "Santa Marta", "La Guajira", "Amazonas", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1583531352515-8884af319dc1?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: "Internacionales",
-                    desc: "El mundo a tus pies.",
-                    items: ["Punta Cana & Cancún", "Europa Soñada", "Dubai Exótico", "Perú Ancestral", "Cruceros por el Caribe", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: "Fechas Especiales",
-                    desc: "Momentos únicos.",
-                    items: ["Fiestas de Quinceañeras", "Lunas de Miel", "Excursiones de Colegio", "Bodas en la Playa", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=600"
-                }
-            ];
-
-            return (
-                <section id="servicios" className="py-20 bg-gray-50">
-                    <div className="container mx-auto px-6">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl font-bold text-gray-800 mb-4">Explora por Categorías</h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">Seleccionamos los mejores lugares para que solo te preocupes por disfrutar.</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {categories.map((cat, idx) => (
-                                <div key={idx} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 group">
-                                    <div className="h-48 overflow-hidden">
-                                        <img src={cat.image} alt={cat.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
-                                    </div>
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">{cat.title}</h3>
-                                        <p className="text-sm text-cyan-600 font-medium mb-4">{cat.desc}</p>
-                                        <ul className="space-y-2">
-                                            {cat.items.map((item, i) => (
-                                                <li key={i} className="flex items-center text-gray-600 text-sm">
-                                                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> {item}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            );
-        };
-
-        // About
-        const About = () => (
-            <section id="nosotros" className="py-20 bg-white">
-                <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center gap-12">
-                        <div className="md:w-1/2">
-                            <div className="relative">
-                                {/* IMAGEN ACERCA DE */}
-                                <img src="./web_images/acercade_pic.jpg" alt="Equipo Viento Fresco" className="rounded-lg shadow-2xl z-10 relative" />
-                                <div className="absolute -bottom-6 -right-6 bg-cyan-500 text-white p-6 rounded-lg shadow-xl hidden md:block z-20">
-                                    <p className="text-3xl font-bold">19+</p>
-                                    <p className="text-sm">Años de Experiencia</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="md:w-1/2">
-                            <h4 className="text-cyan-600 font-bold uppercase tracking-widest mb-2">Sobre Nosotros</h4>
-                            <h2 className="text-4xl font-bold text-gray-800 mb-6">¿Por qué elegir nuestra asesoría?</h2>
-                            <p className="text-gray-600 mb-6 leading-relaxed">
-                                En <strong>Viento Fresco</strong>, nuestra misión es cumplir tus sueños de viajar. Sabemos que planear un viaje puede ser estresante y que existen riesgos en internet.
-                            </p>
-                            <p className="text-gray-600 mb-6 leading-relaxed">
-                                Soy <strong>Biviana</strong>, tu asesora de confianza. Mi trabajo es asegurarme de que recibas la mejor atención directa de la agencia, verificando disponibilidad y asegurando que tu experiencia sea perfecta desde el primer contacto hasta tu regreso a casa.
-                            </p>
-                            <div className="bg-blue-50 border-l-4 border-cyan-500 p-4 mb-6">
-                                <p className="text-sm text-gray-700 italic">
-                                    "Debido a tanto fraude en el mercado, nos caracterizamos por la transparencia. Nuestros clientes certifican nuestra calidad y cumplimiento."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-
-        // Testimonials
-        const Testimonials = () => (
-            <section id="testimonios" className="py-20 bg-cyan-900 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                    <MapPin className="w-full h-full" />
-                </div>
-                <div className="container mx-auto px-6 relative z-10 text-center">
-                    <h2 className="text-4xl font-bold mb-12">Lo que dicen nuestros viajeros</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
-                            </div>
-                            <p className="italic mb-6">"Gracias a la asesoría de Biviana pudimos organizar el viaje de quinceañeras de mi hija sin estrés. Todo salió perfecto con Viento Fresco."</p>
-                            <h4 className="font-bold">- Familia Restrepo</h4>
-                        </div>
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
-                            </div>
-                            <p className="italic mb-6">"Tenía miedo de reservar por internet, pero la atención personalizada me dio seguridad. El viaje a San Andrés fue inolvidable."</p>
-                            <h4 className="font-bold">- Carolina M.</h4>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-
-        // Contact
-        const Contact = () => {
-            useEffect(() => {
-                const d = document;
-                const w = "https://tally.so/widgets/embed.js";
-                
-                const loadTally = () => {
-                    if (typeof Tally !== "undefined") {
-                        Tally.loadEmbeds();
-                    } else {
-                        d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((e) => {
-                            e.src = e.dataset.tallySrc;
-                        });
-                    }
-                };
-
-                if (typeof Tally !== "undefined") {
-                    loadTally();
-                } else if (d.querySelector(`script[src="${w}"]`) === null) {
-                    const s = d.createElement("script");
-                    s.src = w;
-                    s.onload = loadTally;
-                    s.onerror = loadTally;
-                    d.body.appendChild(s);
-                }
-            }, []);
-
-            return (
-                <section id="contacto" className="py-20 bg-gray-100">
-                    <div className="container mx-auto px-6">
-                        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-                            <div className="md:w-5/12 bg-cyan-600 text-white p-10 flex flex-col justify-between">
-                                <div>
-                                    <h3 className="text-3xl font-bold mb-4">¡Hablemos ahora!</h3>
-                                    <p className="mb-8 opacity-90 leading-relaxed">
-                                        ¿Tienes dudas o quieres una cotización rápida? La forma más ágil de contactarme es por WhatsApp. Estoy lista para asesorarte.
-                                    </p>
-                                    
-                                    <a 
-                                        href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20web%20y%20quiero%20cotizar%20un%20viaje." 
-                                        target="_blank"
-                                        className="bg-green-500 text-white font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-3 mb-8 group transform hover:scale-105 duration-200"
-                                    >
-                                        <div className="bg-white text-green-500 p-2 rounded-full">
-                                            <Phone className="w-6 h-6 fill-current" />
-                                        </div>
-                                        <span className="text-lg">Chatear con Biviana</span>
-                                    </a>
-
-                                    <div className="space-y-4 border-t border-cyan-500 pt-8">
-                                        <p className="font-semibold mb-2">O contáctame directamente:</p>
-                                        <div className="flex items-center gap-3">
-                                            <Phone className="w-5 h-5" />
-                                            <span>+57 313 727 5681</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <MapPin className="w-5 h-5" />
-                                            <span>Medellín, Colombia</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-10 pt-6 border-t border-cyan-500/30">
-                                    <p className="text-xs opacity-75">Tu asesora de confianza: Biviana</p>
-                                </div>
-                            </div>
-                            
-                            <div className="md:w-7/12 p-10 bg-gray-50">
-                                <div className="mb-6">
-                                    <h3 className="text-2xl font-bold text-gray-800">Solicitud Formal</h3>
-                                    {/* CAMBIO DE TEXTO APLICADO AQUI */}
-                                    <p className="text-gray-500 text-sm">Si aun no estas seguro del destino y solo tienes una idea, perfecto!, deja tus datos y te contacto cuanto antes para brindarte toda la información que necesites.</p>
-                                </div>
-                                
-                                <div id="form-container">
-                                    <iframe 
-                                        data-tally-src="https://tally.so/embed/yPXoap?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
-                                        loading="lazy" 
-                                        width="100%" 
-                                        height="276" 
-                                        frameBorder="0" 
-                                        marginHeight="0" 
-                                        marginWidth="0" 
-                                        title="Solicitud (Te contactamos!)"
-                                    ></iframe>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            );
-        };
-
-        // WhatsApp Button
-        const WhatsAppButton = () => (
-            <a 
-                href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20página%20web%20de%20Viento%20Fresco%20y%20quiero%20información." 
-                target="_blank" 
-                className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition z-50 animate-pulse flex items-center justify-center"
-                title="Hablar con Biviana"
-            >
-                <Phone className="w-8 h-8 fill-current" />
-            </a>
-        );
-
-        const Footer = () => (
-            <footer className="bg-gray-900 text-white py-8">
-                <div className="container mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-                    <div className="mb-4 md:mb-0">
-                        <h5 className="text-xl font-bold text-cyan-400">VIENTO FRESCO</h5>
-                        <p className="text-sm text-gray-400">Asesoría de Viajes Autorizada</p>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        &copy; {new Date().getFullYear()} Viento Fresco. Todos los derechos reservados.
-                    </div>
-                </div>
-            </footer>
-        );
-
-        // Main App Component
-        const App = () => {
-            const heroImage = "./web_images/intro.jpg"; 
-
-            const scrollToSection = (id) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            };
-            
-            return (
-                <div className="antialiased">
-                    <Navbar scrollToSection={scrollToSection} />
-                    <Hero scrollToSection={scrollToSection} heroImage={heroImage} /> 
-                    <Features />
-                    
-                    {/* SECCIÓN NACIONAL */}
-                    <Carousel3D 
-                        id="destacados"
-                        folder="viajes" /* CORREGIDO: Antes decía "videos" */
-                        filePrefix="viaje" /* CORREGIDO: Antes decía "imagen" */
-                        badge="🇨🇴 SECCIÓN DE VIAJES NACIONALES"
-                        title="Destinos Nacionales Más Populares"
-                        subtitleStart="Estos son algunos de los viajes más vendidos. ¿Buscas otro destino en Colombia?"
-                        linkText="Escríbenos"
-                        subtitleEnd="y te ayudamos."
-                        backgroundStyle="linear-gradient(to bottom, #0f172a, #155e75)" /* Azul Oscuro - Cyan */
-                        scrollToSection={scrollToSection}
-                    />
-
-                    {/* SECCIÓN INTERNACIONAL (NUEVA) */}
-                    <Carousel3D 
-                        id="internacionales"
-                        folder="viajes_int" 
-                        filePrefix="viaje"
-                        badge="🌎 SECCIÓN DE VIAJES INTERNACIONALES"
-                        title="Destinos Internacionales Más Solicitados"
-                        subtitleStart="Explora nuestras opciones destacadas. Si buscas otro país o ciudad,"
-                        linkText="¡pregúntanos!"
-                        subtitleEnd="Tenemos más destinos disponibles."
-                        backgroundStyle="linear-gradient(to bottom, #1e1b4b, #312e81)" /* Índigo Profundo (Morado) - Complementario */
-                        scrollToSection={scrollToSection}
-                    />
-
-                    <Services />
-                    <About />
-                    <Testimonials />
-                    <Contact />
-                    <Footer />
-                    <WhatsAppButton />
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
