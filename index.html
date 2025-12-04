@@ -62,21 +62,21 @@
 
         /* --- ESTILOS DEL CARRUSEL 3D --- */
         .carousel-3d-section {
-            padding: 40px 0 180px; /* AUMENTADO: de 120px a 180px para que quepa el texto de ayuda */
+            padding: 40px 0 180px; 
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #fff;
             overflow: hidden;
-            min-height: 650px; 
+            min-height: 850px; /* AUMENTADO: Para acomodar las fotos verticales altas */
             position: relative;
         }
 
         .carousel-wrapper {
             perspective: 1200px;
-            width: 360px;
-            height: 270px;
+            width: 300px;  /* CAMBIO: Ancho más angosto */
+            height: 533px; /* CAMBIO: Altura para relación de aspecto 9:16 */
             position: relative;
             margin-top: 30px;
         }
@@ -93,10 +93,10 @@
 
         .slide-3d {
             position: absolute;
-            width: 360px;
-            height: 270px;
-            border: 1px solid #ffffff30; /* Borde sutil */
-            border-radius: 8px;
+            width: 300px;  /* CAMBIO: Igual al wrapper */
+            height: 533px; /* CAMBIO: Igual al wrapper */
+            border: 1px solid #ffffff30; 
+            border-radius: 12px; /* Un poco más redondeado para estética móvil */
             overflow: hidden;
             transition: transform 0.5s, opacity 0.5s;
             cursor: zoom-in;
@@ -121,7 +121,7 @@
             justify-content: center;
             gap: 40px;
             pointer-events: none; 
-            z-index: 10; /* Asegura que los controles estén encima */
+            z-index: 10; 
         }
 
         .controls-3d button {
@@ -181,8 +181,9 @@
         }
 
         @media (max-width: 420px) {
-            .carousel-wrapper { width: 300px; height: 225px; }
-            .slide-3d { width: 300px; height: 225px; }
+            /* AJUSTE MÓVIL: Escala proporcional 9:16 para celulares */
+            .carousel-wrapper { width: 260px; height: 462px; }
+            .slide-3d { width: 260px; height: 462px; }
         }
     </style>
 </head>
