@@ -350,7 +350,7 @@
                     };
 
                     while (keepChecking && i <= 50) {
-                        const path = `./${folder}/${filePrefix}${i}.jpg`;
+                        const path = `./${folder}/${filePrefix}${i}.jpeg`;
                         try {
                             await loadImage(path);
                             foundImages.push(path);
