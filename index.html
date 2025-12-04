@@ -333,58 +333,50 @@
             const [lightboxSrc, setLightboxSrc] = useState(null);
             const [images, setImages] = useState([]); 
             const [radius, setRadius] = useState(400); 
-            const [loading, setLoading] = useState(true); // Nuevo estado de carga
+            const [loading, setLoading] = useState(true); 
 
             useEffect(() => {
                 const checkImages = async () => {
                     setLoading(true);
-                    const foundImages = [];
-                    const maxChecks = 20; 
+                    const maxChecks = 50; // Buscar hasta la foto 50
                     
-                    // OPTIMIZACIÓN: Solo busca .jpeg para minimizar tiempo de carga
-                    const extensions = ['.jpeg'];
-                    
-                    // Creamos promesas para verificar imágenes en paralelo
-                    const promises = [];
-
-                    for (let i = 1; i <= maxChecks; i++) {
-                        // Para cada número, intentamos todas las extensiones
-                        const imageCheckPromise = new Promise(async (resolve) => {
-                            let foundPath = null;
-                            for (const ext of extensions) {
-                                const path = `./${folder}/${filePrefix}${i}${ext}`;
-                                try {
-                                    await new Promise((res, rej) => {
-                                        const img = new Image();
-                                        img.onload = () => res();
-                                        img.onerror = () => rej();
-                                        img.src = path;
-                                    });
-                                    foundPath = path;
-                                    break; // Encontró una, deja de buscar extensiones para este número
-                                } catch (e) {
-                                    // Sigue intentando
-                                }
-                            }
-                            resolve(foundPath);
+                    // Función para verificar si una imagen existe
+                    const checkImageExists = (index) => {
+                        const path = `./${folder}/${filePrefix}${index}.jpeg`; // SOLO BUSCA .jpeg
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => resolve(path);
+                            img.onerror = () => resolve(null); // Si falla, devuelve null (no rechaza)
+                            img.src = path;
                         });
-                        promises.push(imageCheckPromise);
+                    };
+
+                    // Crear array de promesas para ejecutar en paralelo
+                    const promises = [];
+                    for (let i = 1; i <= maxChecks; i++) {
+                        promises.push(checkImageExists(i));
                     }
 
+                    // Esperar a que todas las verificaciones terminen
                     const results = await Promise.all(promises);
-                    // Filtramos los nulos (los que no se encontraron)
-                    const validImages = results.filter(img => img !== null);
                     
+                    // Filtrar solo las rutas válidas (no null)
+                    let validImages = results.filter(path => path !== null);
+
                     // FALLBACKS (Solo si no hay NINGUNA foto real)
                     if (validImages.length === 0) {
                         const fallbackBase = folder === 'viajes' 
                             ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
                             : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600";
-                        validImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
+                        
+                        // Rellenar con fallbacks
+                        validImages = [fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase];
                     }
+                    
                     setImages(validImages);
                     setLoading(false);
                 };
+
                 checkImages();
             }, [folder, filePrefix]);
 
@@ -422,14 +414,17 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
-            // Si no hay imágenes cargadas aún, mostrar loader en lugar de desaparecer
-            if (images.length === 0) {
+            // Si está cargando, mostrar mensaje en lugar de ocultar
+            if (loading) {
                 return (
                     <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle, minHeight: '400px' }}>
                         <div className="text-white text-xl animate-pulse">Cargando galería...</div>
                     </section>
                 );
             }
+            
+            // Si no hay imágenes (ni fallbacks), ocultar, pero esto es improbable con el fallback
+            if (slideCount === 0) return null;
 
             return (
                 <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle }}>
