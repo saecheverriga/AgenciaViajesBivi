@@ -328,48 +328,10 @@
         );
 
         // --- COMPONENTE DE CARRUSEL 3D REUTILIZABLE ---
-        const Carousel3D = ({ id, folder, filePrefix, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection }) => {
+        const Carousel3D = ({ id, images, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection }) => {
             const [angle, setAngle] = useState(0);
             const [lightboxSrc, setLightboxSrc] = useState(null);
-            const [images, setImages] = useState([]); 
             const [radius, setRadius] = useState(400); 
-
-            useEffect(() => {
-                const checkImages = async () => {
-                    const foundImages = [];
-                    let i = 1;
-                    let keepChecking = true;
-                    
-                    const loadImage = (url) => {
-                        return new Promise((resolve, reject) => {
-                            const img = new Image();
-                            img.onload = () => resolve(url);
-                            img.onerror = () => reject(url);
-                            img.src = url;
-                        });
-                    };
-
-                    while (keepChecking && i <= 50) {
-                        const path = `./${folder}/${filePrefix}${i}.jpeg`;
-                        try {
-                            await loadImage(path);
-                            foundImages.push(path);
-                            i++;
-                        } catch (error) {
-                            keepChecking = false; 
-                        }
-                    }
-                    
-                    if (foundImages.length === 0) {
-                        const fallbackBase = folder === 'viajes' 
-                            ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
-                            : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600";
-                        foundImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
-                    }
-                    setImages(foundImages);
-                };
-                checkImages();
-            }, [folder, filePrefix]);
 
             const slideCount = images.length;
             const theta = slideCount > 0 ? 360 / slideCount : 0;
@@ -405,6 +367,7 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
+            // Si no hay imágenes, no renderizar
             if (slideCount === 0) return null;
 
             return (
@@ -662,6 +625,12 @@
                 }
             };
             
+            // GENERAR LISTAS DE IMAGENES (MANUAL / ESTATICA PARA SEO Y VELOCIDAD)
+            // TODO: SEO MANUAL - Si deseas cambiar los nombres de archivo por nombres descriptivos (ej: 'cartagena.jpeg'), 
+            // edita estos arrays manualmente en lugar de usar el generador.
+            const nationalImages = Array.from({length: 45}, (_, i) => `./viajes/viaje${i+1}.jpeg`);
+            const internationalImages = Array.from({length: 28}, (_, i) => `./viajes_int/viaje${i+1}.jpeg`);
+
             return (
                 <div className="antialiased">
                     <Navbar scrollToSection={scrollToSection} />
@@ -671,8 +640,7 @@
                     {/* SECCIÓN NACIONAL */}
                     <Carousel3D 
                         id="destacados"
-                        folder="viajes"
-                        filePrefix="viaje"
+                        images={nationalImages}
                         badge="🇨🇴 SECCIÓN DE VIAJES NACIONALES"
                         title="Destinos Nacionales Más Populares"
                         subtitleStart="Estos son algunos de los viajes más vendidos. ¿Buscas otro destino en Colombia?"
@@ -685,8 +653,7 @@
                     {/* SECCIÓN INTERNACIONAL */}
                     <Carousel3D 
                         id="internacionales"
-                        folder="viajes_int" 
-                        filePrefix="viaje"
+                        images={internationalImages}
                         badge="🌎 SECCIÓN DE VIAJES INTERNACIONALES"
                         title="Destinos Internacionales Más Solicitados"
                         subtitleStart="Explora nuestras opciones destacadas. Si buscas otro país o ciudad,"
