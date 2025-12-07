@@ -226,6 +226,7 @@
         const Plane = ({ className }) => <IconWrapper className={className}><path d="M22 22h20"/><path d="M13 2L2 14h10l-2 8 11-10H11l2-10z"/></IconWrapper>;
         const Users = ({ className }) => <IconWrapper className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
         const Heart = ({ className }) => <IconWrapper className={className}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></IconWrapper>;
+        const PlayCircle = ({ className }) => <IconWrapper className={className}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></IconWrapper>;
 
         // --- COMPONENTES PRINCIPALES ---
 
@@ -247,6 +248,7 @@
                             <button onClick={() => scrollToSection('destacados')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Destacados</button>
                             <button onClick={() => scrollToSection('internacionales')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Internacional</button>
                             <button onClick={() => scrollToSection('nosotros')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Nosotros</button>
+                            <button onClick={() => scrollToSection('testimonios')} className="text-gray-600 hover:text-cyan-500 transition font-medium">Testimonios</button>
                             <button onClick={() => scrollToSection('contacto')} className="bg-cyan-500 text-white px-6 py-2 rounded-full font-bold hover:bg-cyan-600 transition shadow-lg transform hover:scale-105">
                                 Cotizar
                             </button>
@@ -367,7 +369,6 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
-            // Si no hay imágenes, no renderizar
             if (slideCount === 0) return null;
 
             return (
@@ -504,33 +505,58 @@
             </section>
         );
 
-        // Testimonials
-        const Testimonials = () => (
-            <section id="testimonios" className="py-20 bg-cyan-900 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                    <MapPin className="w-full h-full" />
-                </div>
-                <div className="container mx-auto px-6 relative z-10 text-center">
-                    <h2 className="text-4xl font-bold mb-12">Lo que dicen nuestros viajeros</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
-                            </div>
-                            <p className="italic mb-6">"Gracias a la asesoría de Biviana pudimos organizar el viaje de quinceañeras de mi hija sin estrés. Todo salió perfecto con Viento Fresco."</p>
-                            <h4 className="font-bold">- Familia Restrepo</h4>
-                        </div>
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
-                            </div>
-                            <p className="italic mb-6">"Tenía miedo de reservar por internet, pero la atención personalizada me dio seguridad. El viaje a San Andrés fue inolvidable."</p>
-                            <h4 className="font-bold">- Carolina M.</h4>
-                        </div>
+        // --- NUEVO COMPONENTE: TESTIMONIOS EN VIDEO ---
+        const VideoTestimonials = () => {
+            // LISTA MANUAL DE VIDEOS (Recomendado para SEO y control de portada)
+            // Asegúrate de tener los archivos en la carpeta 'testimonios'
+            const videos = [
+                { id: 1, src: "./testimonios/video1.mp4", poster: "./testimonios/poster1.jpg" },
+                { id: 2, src: "./testimonios/video2.mp4", poster: "./testimonios/poster2.jpg" },
+                { id: 3, src: "./testimonios/video3.mp4", poster: "./testimonios/poster3.jpg" },
+                // Puedes agregar más videos aquí
+            ];
+
+            return (
+                <section id="testimonios" className="py-20 bg-gray-900 text-white relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                        <MapPin className="w-full h-full text-cyan-800" />
                     </div>
-                </div>
-            </section>
-        );
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-12">
+                            <h2 className="text-4xl font-bold mb-4">Lo que dicen nuestros viajeros</h2>
+                            <p className="text-cyan-300 max-w-2xl mx-auto text-lg">Historias reales de experiencias inolvidables</p>
+                        </div>
+                        
+                        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            {/* Si no hay videos reales, mostramos un mensaje o placeholder */}
+                            {videos.length === 0 ? (
+                                <div className="w-full text-center text-gray-400 py-10">Muy pronto: Historias de nuestros viajeros.</div>
+                            ) : (
+                                videos.map((video) => (
+                                    <div key={video.id} className="min-w-[280px] w-[280px] h-[500px] flex-shrink-0 snap-center bg-black rounded-2xl overflow-hidden shadow-xl border border-gray-700 relative group">
+                                        <video 
+                                            controls 
+                                            preload="none" 
+                                            poster={video.poster}
+                                            className="w-full h-full object-cover"
+                                        >
+                                            <source src={video.src} type="video/mp4" />
+                                            Tu navegador no soporta videos.
+                                        </video>
+                                        
+                                        {/* Overlay de "Play" para invitar a ver (desaparece al dar play nativo) */}
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:bg-black/20 transition">
+                                            <PlayCircle className="w-16 h-16 text-white/80 drop-shadow-lg" />
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <p className="text-center text-gray-500 text-sm mt-2">Desliza para ver más historias →</p>
+                    </div>
+                </section>
+            );
+        };
 
         // Contact
         const Contact = () => {
@@ -626,8 +652,7 @@
             };
             
             // GENERAR LISTAS DE IMAGENES (MANUAL / ESTATICA PARA SEO Y VELOCIDAD)
-            // TODO: SEO MANUAL - Si deseas cambiar los nombres de archivo por nombres descriptivos (ej: 'cartagena.jpeg'), 
-            // edita estos arrays manualmente en lugar de usar el generador.
+            // CORREGIDO: Se añadieron las comillas invertidas (`) que faltaban para el template literal
             const nationalImages = Array.from({length: 45}, (_, i) => `./viajes/viaje${i+1}.jpeg`);
             const internationalImages = Array.from({length: 28}, (_, i) => `./viajes_int/viaje${i+1}.jpeg`);
 
@@ -665,7 +690,7 @@
 
                     <Services />
                     <About />
-                    <Testimonials />
+                    <VideoTestimonials /> {/* Nueva Sección de Videos */}
                     <Contact />
                     <Footer />
                     <WhatsAppButton />
