@@ -131,6 +131,9 @@
             cursor: zoom-in;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             background: #222;
+            /* Optimización para evitar parpadeos en iOS */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .slide-3d img {
@@ -519,11 +522,26 @@
             const [angle, setAngle] = useState(0);
             const [lightboxSrc, setLightboxSrc] = useState(null);
             const [radius, setRadius] = useState(400); 
+            // NUEVO ESTADO PARA LIMITAR IMÁGENES EN MÓVIL
+            const [displayImages, setDisplayImages] = useState([]);
 
             // Si no hay imágenes, no renderizamos nada
             if (!images || images.length === 0) return null;
 
-            const slideCount = images.length;
+            useEffect(() => {
+                // DETECCIÓN DE MÓVIL Y REDUCCIÓN DE CARGA
+                // iOS tiene límites estrictos de memoria para WebGL/3D transforms.
+                // 45 capas 3D de alta resolución colapsan el WebKit del iPhone.
+                const isMobile = window.innerWidth < 768;
+                if (isMobile && images.length > 15) {
+                    // En móvil, mostramos máximo 15 para evitar el crash
+                    setDisplayImages(images.slice(0, 15));
+                } else {
+                    setDisplayImages(images);
+                }
+            }, [images]);
+
+            const slideCount = displayImages.length;
             const theta = slideCount > 0 ? 360 / slideCount : 0;
 
             const rotate = (dir) => {
@@ -567,11 +585,15 @@
                         <p className="text-gray-200 max-w-2xl mx-auto text-lg">
                             {subtitleStart} <button onClick={() => scrollToSection('contacto')} className="text-cyan-300 font-bold hover:text-white underline decoration-2 underline-offset-4 cursor-pointer bg-transparent border-none p-0 inline transition-colors">{linkText}</button> {subtitleEnd}
                         </p>
+                        {/* Mensaje sutil si se redujeron las imágenes en móvil */}
+                        {images.length > displayImages.length && (
+                            <p className="text-xs text-cyan-200/50 mt-2 italic">(Mostrando selección destacada en móvil para mejor rendimiento)</p>
+                        )}
                     </div>
 
                     <div className="carousel-wrapper">
                         <div className="carousel-3d" style={{ transform: `translateZ(-${radius}px) rotateY(${angle}deg)` }}>
-                            {images.map((src, i) => (
+                            {displayImages.map((src, i) => (
                                 <div key={i} className="slide-3d" style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }} onClick={() => setLightboxSrc(src)}>
                                     <img src={src} alt={`${title} - Imagen ${i + 1}`} loading="lazy" />
                                 </div>
