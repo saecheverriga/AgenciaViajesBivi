@@ -79,6 +79,15 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Ocultar scrollbar en contenedor de videos pero permitir scroll */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         /* --- ESTILOS DEL CARRUSEL 3D --- */
         .carousel-3d-section {
@@ -261,28 +270,17 @@
                     subtitle_end: "Tenemos más destinos disponibles.",
                     click_hint: "👆 Haz clic en la imagen para ver detalles"
                 },
-                services: {
-                    title: "Explora por Categorías",
-                    subtitle: "Seleccionamos los mejores lugares para que solo te preocupes por disfrutar.",
-                    regional_title: "Regionales (Antioquia)",
-                    regional_desc: "La magia cerca de casa.",
-                    national_title: "Nacionales (Colombia)",
-                    national_desc: "Paraísos en nuestro país.",
-                    intl_title: "Internacionales",
-                    intl_desc: "El mundo a tus pies.",
-                    dates_title: "Fechas Especiales",
-                    dates_desc: "Momentos únicos."
+                videos: {
+                    title: "Experiencias Reales",
+                    subtitle: "Debido a tanto fraude en el mercado, nos caracterizamos por la transparencia. Nuestros clientes certifican nuestra calidad y cumplimiento.",
+                    scroll_hint: "Desliza para ver más videos →"
                 },
                 about: {
-                    badge: "Sobre Nosotros",
-                    title: "¿Por qué elegir nuestra asesoría?",
-                    p1: "En <strong>Viento Fresco</strong>, nuestra misión es cumplir tus sueños de viajar. Sabemos que planear un viaje puede ser estresante y que existen riesgos en internet.",
-                    p2: "Soy <strong>Biviana</strong>, tu asesora de confianza. Mi trabajo es asegurarme de que recibas la mejor atención directa de la agencia, verificando disponibilidad y asegurando que tu experiencia sea perfecta desde el primer contacto hasta tu regreso a casa.",
-                    quote: "\"Debido a tanto fraude en el mercado, nos caracterizamos por la transparencia. Nuestros clientes certifican nuestra calidad y cumplimiento.\"",
+                    badge: "Tu asesora Bivi",
+                    title: "Un poquito acerca de mi",
+                    p1: "Soy <strong>Biviana</strong>, mano derecha de Sara y parte integral del equipo <strong>Viento Fresco</strong>. Trabajamos juntas para brindarte seguridad y confianza.",
+                    p2: "Conmigo tienes un <strong>enlace directo</strong>. Mi objetivo es conocer tus necesidades específicas y dirigirlas al equipo encargado para asegurar que tengas la mejor experiencia posible, de principio a fin.",
                     years: "Años de Experiencia"
-                },
-                testimonials: {
-                    title: "Lo que dicen nuestros viajeros"
                 },
                 contact: {
                     title: "¡Hablemos ahora!",
@@ -345,28 +343,17 @@
                     subtitle_end: "We have more destinations available.",
                     click_hint: "👆 Click on the image to see details"
                 },
-                services: {
-                    title: "Explore by Categories",
-                    subtitle: "We select the best places so you only worry about enjoying yourself.",
-                    regional_title: "Regional (Antioquia)",
-                    regional_desc: "Magic close to home.",
-                    national_title: "National (Colombia)",
-                    national_desc: "Paradises in our country.",
-                    intl_title: "International",
-                    intl_desc: "The world at your feet.",
-                    dates_title: "Special Dates",
-                    dates_desc: "Unique moments."
+                videos: {
+                    title: "Real Experiences",
+                    subtitle: "Due to so much fraud in the market, we are characterized by transparency. Our clients certify our quality and compliance.",
+                    scroll_hint: "Swipe to see more videos →"
                 },
                 about: {
-                    badge: "About Us",
-                    title: "Why choose our advice?",
-                    p1: "At <strong>Viento Fresco</strong>, our mission is to fulfill your travel dreams. We know that planning a trip can be stressful and that there are risks on the internet.",
-                    p2: "I am <strong>Biviana</strong>, your trusted advisor. My job is to ensure you receive the best direct attention from the agency, verifying availability and ensuring your experience is perfect from the first contact until you return home.",
-                    quote: "\"Due to so much fraud in the market, we are characterized by transparency. Our clients certify our quality and compliance.\"",
+                    badge: "Your Advisor Bivi",
+                    title: "A little about me",
+                    p1: "I am <strong>Biviana</strong>, Sara's right hand and part of the <strong>Viento Fresco</strong> team. We work together to provide you with security and confidence.",
+                    p2: "With me you have a <strong>direct link</strong>. My goal is to know your needs and direct them to the team in charge so you have the best experience.",
                     years: "Years of Experience"
-                },
-                testimonials: {
-                    title: "What our travelers say"
                 },
                 contact: {
                     title: "Let's talk now!",
@@ -482,32 +469,45 @@
 
         // Features - SECCIÓN: ¿POR QUÉ ELEGIRNOS?
         const Features = ({ t }) => (
-            <section className="py-10 bg-white border-b border-gray-100">
-                <div className="container mx-auto px-6">
-                    <div className="text-center mb-8">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">{t.features.title}</h2>
+            <section className="py-24 bg-gradient-to-b from-slate-900 via-teal-900 to-cyan-800 text-white border-t border-slate-800 relative overflow-hidden">
+                {/* Elemento decorativo de fondo */}
+                <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                    </svg>
+                </div>
+
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t.features.title}</h2>
+                        <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                        <div className="p-5 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
-                            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600">
-                                <ShieldCheck className="w-6 h-6" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl hover:transform hover:-translate-y-2 transition duration-300">
+                            <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-600 shadow-lg">
+                                <ShieldCheck className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-bold mb-1 text-gray-800">{t.features.card1_title}</h3>
-                            <p className="text-sm text-gray-600 leading-snug">{t.features.card1_desc} <span className="font-semibold text-green-600">{t.features.card1_highlight}</span>.</p>
+                            <h3 className="text-xl font-bold mb-3 text-white">{t.features.card1_title}</h3>
+                            <p className="text-cyan-100 leading-relaxed">{t.features.card1_desc} <span className="font-bold text-yellow-300">{t.features.card1_highlight}</span>.</p>
                         </div>
-                        <div className="p-5 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
-                            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600">
-                                <CheckCircle className="w-6 h-6" />
+                        <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl hover:transform hover:-translate-y-2 transition duration-300">
+                            <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-lg">
+                                <CheckCircle className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-bold mb-1 text-gray-800">{t.features.card2_title}</h3>
-                            <p className="text-sm text-gray-600 leading-snug">{t.features.card2_desc} <span className="font-semibold text-blue-600">{t.features.card2_highlight}</span> {t.features.card2_desc_end}</p>
+                            <h3 className="text-xl font-bold mb-3 text-white">{t.features.card2_title}</h3>
+                            <p className="text-cyan-100 leading-relaxed">{t.features.card2_desc} <span className="font-bold text-yellow-300">{t.features.card2_highlight}</span> {t.features.card2_desc_end}</p>
                         </div>
-                        <div className="p-5 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition duration-300">
-                            <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-purple-600">
-                                <Users className="w-6 h-6" />
+                        <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl hover:transform hover:-translate-y-2 transition duration-300">
+                            <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-purple-600 shadow-lg">
+                                <Users className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-bold mb-1 text-gray-800">{t.features.card3_title}</h3>
-                            <p className="text-sm text-gray-600 leading-snug">{t.features.card3_desc} <span className="font-semibold text-purple-600">{t.features.card3_highlight}</span> {t.features.card3_desc_end}</p>
+                            <h3 className="text-xl font-bold mb-3 text-white">{t.features.card3_title}</h3>
+                            <p className="text-cyan-100 leading-relaxed">{t.features.card3_desc} <span className="font-bold text-yellow-300">{t.features.card3_highlight}</span> {t.features.card3_desc_end}</p>
                         </div>
                     </div>
                 </div>
@@ -643,119 +643,76 @@
             );
         };
 
-        // Services
-        const Services = ({ t }) => {
-            const categories = [
-                {
-                    title: t.services.regional_title,
-                    desc: t.services.regional_desc,
-                    items: ["Guatapé y la Piedra", "Medellín City Tour", "Hacienda Nápoles", "Eje Cafetero", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: t.services.national_title,
-                    desc: t.services.national_desc,
-                    items: ["San Andrés Islas", "Cartagena Histórica", "Santa Marta", "La Guajira", "Amazonas", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1583531352515-8884af319dc1?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: t.services.intl_title,
-                    desc: t.services.intl_desc,
-                    items: ["Punta Cana & Cancún", "Europa Soñada", "Dubai Exótico", "Perú Ancestral", "Cruceros por el Caribe", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=600"
-                },
-                {
-                    title: t.services.dates_title,
-                    desc: t.services.dates_desc,
-                    items: ["Fiestas de Quinceañeras", "Lunas de Miel", "Excursiones de Colegio", "Bodas en la Playa", "Muchos mas"],
-                    image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=600"
-                }
+        // Video Testimonials Component (YouTube Shorts)
+        const VideoTestimonials = ({ t }) => {
+            const videoIds = [
+                "UaySFhS4Bxk", "2Uf1seNSvUw", "f8CGs1nFo5A",
+                "BvmCBFmcIlg", "PqQwXyYgUoc", "EUTDsY85Vt4",
+                "5DJo0QmBXxs", "ZJiOi4ZC6vo", "WLX_E5hvpPs"
             ];
 
             return (
-                <section id="servicios" className="py-20 bg-gray-50">
+                 <section id="videos" className="py-20 bg-slate-900 text-white">
                     <div className="container mx-auto px-6">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl font-bold text-gray-800 mb-4">{t.services.title}</h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">{t.services.subtitle}</p>
+                        <div className="text-center mb-12">
+                            <div className="mb-4 inline-block bg-red-600 px-4 py-1 rounded-full text-sm font-semibold uppercase tracking-wider text-white">
+                                Youtube Shorts
+                            </div>
+                            <h2 className="text-4xl font-bold text-white mb-4">{t.videos.title}</h2>
+                            <p className="text-gray-300 max-w-2xl mx-auto">{t.videos.subtitle}</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {categories.map((cat, idx) => (
-                                <div key={idx} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 group">
-                                    <div className="h-48 overflow-hidden">
-                                        <img src={cat.image} alt={cat.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
-                                    </div>
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">{cat.title}</h3>
-                                        <p className="text-sm text-cyan-600 font-medium mb-4">{cat.desc}</p>
-                                        <ul className="space-y-2">
-                                            {cat.items.map((item, i) => (
-                                                <li key={i} className="flex items-center text-gray-600 text-sm">
-                                                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> {item}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                        {/* Horizontal Scroll Container */}
+                        <div className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollBehavior: 'smooth' }}>
+                            {videoIds.map((id, index) => (
+                                <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white">
+                                    <iframe 
+                                        className="w-full h-full absolute inset-0"
+                                        src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&controls=1&showinfo=0`}
+                                        title={`Video Testimonial ${index + 1}`}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer"
+                                    ></iframe>
                                 </div>
                             ))}
                         </div>
+                         <p className="text-center text-gray-400 text-sm mt-4 italic">{t.videos.scroll_hint}</p>
                     </div>
                 </section>
             );
-        };
+        }
 
         // About
         const About = ({ t }) => (
-            <section id="nosotros" className="py-20 bg-white">
+            <section id="nosotros" className="py-24 bg-orange-50">
                 <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center gap-12">
-                        <div className="md:w-1/2">
-                            <div className="relative">
-                                <img src="./web_images/acercade_pic.jpg" alt="Equipo Viento Fresco" className="rounded-lg shadow-2xl z-10 relative" />
-                                <div className="absolute -bottom-6 -right-6 bg-cyan-500 text-white p-6 rounded-lg shadow-xl hidden md:block z-20">
-                                    <p className="text-3xl font-bold">19+</p>
-                                    <p className="text-sm">{t.about.years}</p>
-                                </div>
+                    <div className="flex flex-col md:flex-row items-center gap-16">
+                        <div className="md:w-1/2 relative">
+                            {/* Decorativo detrás de la foto */}
+                            <div className="absolute -top-4 -left-4 w-24 h-24 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                            <div className="absolute -bottom-8 -right-4 w-32 h-32 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                            
+                            <img src="./web_images/acercade_pic.jpg" alt="Equipo Viento Fresco" className="rounded-2xl shadow-2xl z-10 relative transform rotate-1 hover:rotate-0 transition duration-500 border-4 border-white" />
+                            
+                            <div className="absolute -bottom-6 -right-6 bg-teal-600 text-white p-6 rounded-xl shadow-xl hidden md:block z-20">
+                                <p className="text-3xl font-bold">19+</p>
+                                <p className="text-sm">{t.about.years}</p>
                             </div>
                         </div>
                         <div className="md:w-1/2">
-                            <h4 className="text-cyan-600 font-bold uppercase tracking-widest mb-2">{t.about.badge}</h4>
-                            <h2 className="text-4xl font-bold text-gray-800 mb-6">{t.about.title}</h2>
-                            <p className="text-gray-600 mb-6 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.about.p1 }}></p>
-                            <p className="text-gray-600 mb-6 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.about.p2 }}></p>
-                            <div className="bg-blue-50 border-l-4 border-cyan-500 p-4 mb-6">
-                                <p className="text-sm text-gray-700 italic">
-                                    {t.about.quote}
-                                </p>
+                            <span className="text-orange-500 font-bold tracking-widest text-sm uppercase mb-2 block">{t.about.badge}</span>
+                            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8">{t.about.title}</h2>
+                            <div className="prose prose-lg text-gray-600">
+                                <p className="mb-6 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: t.about.p1 }}></p>
+                                <p className="leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: t.about.p2 }}></p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-
-        // Testimonials
-        const Testimonials = ({ t }) => (
-            <section id="testimonios" className="py-20 bg-cyan-900 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                    <MapPin className="w-full h-full" />
-                </div>
-                <div className="container mx-auto px-6 relative z-10 text-center">
-                    <h2 className="text-4xl font-bold mb-12">{t.testimonials.title}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
+                            <div className="mt-8 flex items-center gap-4">
+                                <div className="h-px w-20 bg-orange-300"></div>
+                                <Heart className="text-orange-400 fill-current w-6 h-6" />
+                                <div className="h-px w-20 bg-orange-300"></div>
                             </div>
-                            <p className="italic mb-6">"Gracias a la asesoría de Biviana pudimos organizar el viaje de quinceañeras de mi hija sin estrés. Todo salió perfecto con Viento Fresco."</p>
-                            <h4 className="font-bold">- Familia Restrepo</h4>
-                        </div>
-                        <div className="bg-cyan-800 p-8 rounded-xl shadow-lg">
-                            <div className="flex justify-center mb-4 text-yellow-400">
-                                <Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" /><Star className="fill-current w-5 h-5" />
-                            </div>
-                            <p className="italic mb-6">"Tenía miedo de reservar por internet, pero la atención personalizada me dio seguridad. El viaje a San Andrés fue inolvidable."</p>
-                            <h4 className="font-bold">- Carolina M.</h4>
                         </div>
                     </div>
                 </div>
@@ -788,35 +745,41 @@
             }, []);
 
             return (
-                <section id="contacto" className="py-20 bg-gray-100">
-                    <div className="container mx-auto px-6">
-                        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-                            <div className="md:w-5/12 bg-cyan-600 text-white p-10 flex flex-col justify-between">
+                <section id="contacto" className="py-24 bg-cyan-950 relative overflow-hidden">
+                    {/* Fondo decorativo */}
+                    <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-900/30 rounded-l-full blur-3xl"></div>
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+                            <div className="md:w-5/12 bg-cyan-700 text-white p-12 flex flex-col justify-between relative overflow-hidden">
+                                {/* Círculos decorativos sutiles */}
+                                <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                                
                                 <div>
-                                    <h3 className="text-3xl font-bold mb-4">{t.contact.title}</h3>
-                                    <p className="mb-8 opacity-90 leading-relaxed">
+                                    <h3 className="text-3xl font-bold mb-6">{t.contact.title}</h3>
+                                    <p className="mb-10 text-cyan-100 leading-relaxed text-lg">
                                         {t.contact.subtitle}
                                     </p>
-                                    <a href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20web%20y%20quiero%20cotizar%20un%20viaje." target="_blank" className="bg-green-500 text-white font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-3 mb-8 group transform hover:scale-105 duration-200">
+                                    <a href="https://wa.me/573137275681?text=Hola%20Biviana,%20vi%20la%20web%20y%20quiero%20cotizar%20un%20viaje." target="_blank" className="bg-green-500 text-white font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-3 mb-8 group transform hover:scale-105 duration-200 border border-green-400">
                                         <div className="bg-white text-green-500 p-2 rounded-full"><Phone className="w-6 h-6 fill-current" /></div>
                                         <span className="text-lg">{t.contact.btn_chat}</span>
                                     </a>
-                                    <div className="space-y-4 border-t border-cyan-500 pt-8">
-                                        <p className="font-semibold mb-2">{t.contact.contact_direct}</p>
-                                        <div className="flex items-center gap-3"><Phone className="w-5 h-5" /><span>+57 313 727 5681</span></div>
-                                        <div className="flex items-center gap-3"><MapPin className="w-5 h-5" /><span>Medellín, Colombia</span></div>
+                                    <div className="space-y-5 border-t border-cyan-500/50 pt-8">
+                                        <p className="font-semibold mb-2 text-cyan-200 uppercase text-sm tracking-wider">{t.contact.contact_direct}</p>
+                                        <div className="flex items-center gap-4 text-lg"><Phone className="w-6 h-6" /><span>+57 313 727 5681</span></div>
+                                        <div className="flex items-center gap-4 text-lg"><MapPin className="w-6 h-6" /><span>Medellín, Colombia</span></div>
                                     </div>
                                 </div>
-                                <div className="mt-10 pt-6 border-t border-cyan-500/30">
-                                    <p className="text-xs opacity-75">{t.contact.advisor}</p>
+                                <div className="mt-12 pt-6 border-t border-cyan-500/30">
+                                    <p className="text-sm text-cyan-200">{t.contact.advisor}</p>
                                 </div>
                             </div>
-                            <div className="md:w-7/12 p-10 bg-gray-50">
-                                <div className="mb-6">
-                                    <h3 className="text-2xl font-bold text-gray-800">{t.contact.form_title}</h3>
-                                    <p className="text-gray-500 text-sm">{t.contact.form_desc}</p>
+                            <div className="md:w-7/12 p-12 bg-gray-50">
+                                <div className="mb-8">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{t.contact.form_title}</h3>
+                                    <p className="text-gray-500">{t.contact.form_desc}</p>
                                 </div>
-                                <div id="form-container">
+                                <div id="form-container" className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
                                     <iframe data-tally-src="https://tally.so/embed/yPXoap?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="276" frameBorder="0" marginHeight="0" marginWidth="0" title="Solicitud (Te contactamos!)"></iframe>
                                 </div>
                             </div>
@@ -834,13 +797,22 @@
         );
 
         const Footer = ({ t }) => (
-            <footer className="bg-gray-900 text-white py-8">
-                <div className="container mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-                    <div className="mb-4 md:mb-0">
-                        <h5 className="text-xl font-bold text-cyan-400">VIENTO FRESCO</h5>
-                        <p className="text-sm text-gray-400">{t.footer.advisor}</p>
+            <footer className="bg-slate-950 text-white py-12 border-t border-slate-800">
+                <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="text-center md:text-left">
+                        <h5 className="text-2xl font-bold text-cyan-400 tracking-wider mb-2">VIENTO FRESCO</h5>
+                        <p className="text-slate-400 text-sm max-w-xs">{t.footer.advisor}</p>
                     </div>
-                    <div className="text-sm text-gray-500">&copy; {new Date().getFullYear()} Viento Fresco. {t.footer.rights}</div>
+                    <div className="flex gap-6">
+                        {/* Redes sociales placeholder */}
+                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-cyan-600 transition cursor-pointer text-slate-300 hover:text-white">
+                            <span className="font-bold">Ig</span>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 transition cursor-pointer text-slate-300 hover:text-white">
+                            <span className="font-bold">Fb</span>
+                        </div>
+                    </div>
+                    <div className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Viento Fresco. {t.footer.rights}</div>
                 </div>
             </footer>
         );
@@ -870,7 +842,6 @@
                 <div className="antialiased">
                     <Navbar scrollToSection={scrollToSection} lang={lang} setLang={setLang} t={t} />
                     <Hero scrollToSection={scrollToSection} heroImage={heroImage} t={t} /> 
-                    <Features t={t} />
                     
                     {/* SECCIÓN NACIONAL */}
                     <Carousel3D 
@@ -902,9 +873,12 @@
                         clickHint={t.international.click_hint}
                     />
 
-                    <Services t={t} />
+                    <VideoTestimonials t={t} />
+                    
+                    {/* Features movido aquí debajo de los videos */}
+                    <Features t={t} />
+
                     <About t={t} />
-                    <Testimonials t={t} />
                     <Contact t={t} />
                     <Footer t={t} />
                     <WhatsAppButton />
