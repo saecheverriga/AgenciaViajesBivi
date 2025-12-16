@@ -514,73 +514,14 @@
             </section>
         );
 
-        // --- COMPONENTE DE CARRUSEL 3D REUTILIZABLE ---
-        const Carousel3D = ({ id, folder, filePrefix, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection, clickHint }) => {
+        // --- COMPONENTE DE CARRUSEL 3D ACTUALIZADO (Recibe lista exacta) ---
+        const Carousel3D = ({ id, images, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection, clickHint }) => {
             const [angle, setAngle] = useState(0);
             const [lightboxSrc, setLightboxSrc] = useState(null);
-            
-            // Inicializar con imágenes de respaldo para que la sección siempre sea visible en vivo
-            const defaultImages = folder === 'viajes' ? [
-                "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600", // San Andrés
-                "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=600", // Cartagena
-                "https://images.unsplash.com/photo-1583531352515-8884af319dc1?auto=format&fit=crop&q=80&w=600", // Eje Cafetero
-                "https://images.unsplash.com/photo-1591746200676-4742f1f5492d?auto=format&fit=crop&q=80&w=600", // Tayrona
-                "https://images.unsplash.com/photo-1533630737184-7833055979eb?auto=format&fit=crop&q=80&w=600"  // Guatape
-            ] : [
-                "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600", // Paris
-                "https://images.unsplash.com/photo-1520106212299-d99c443e4568?auto=format&fit=crop&q=80&w=600", // Roma
-                "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=600", // Cancun
-                "https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&q=80&w=600", // Venecia
-                "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=600"  // Taj Mahal
-            ];
-
-            const [images, setImages] = useState(defaultImages); 
             const [radius, setRadius] = useState(400); 
 
-            useEffect(() => {
-                const checkImages = async () => {
-                    const foundImages = [];
-                    let i = 1;
-                    let keepChecking = true;
-                    const extensions = ['.jpeg', '.jpg', '.png', '.JPG', '.JPEG'];
-                    
-                    const loadImage = (url) => {
-                        return new Promise((resolve, reject) => {
-                            const img = new Image();
-                            img.onload = () => resolve(url);
-                            img.onerror = () => reject(url);
-                            img.src = url;
-                        });
-                    };
-
-                    while (keepChecking && i <= 50) {
-                        let found = false;
-                        for (const ext of extensions) {
-                            const path = `./${folder}/${filePrefix}${i}${ext}`;
-                            try {
-                                await loadImage(path);
-                                foundImages.push(path);
-                                found = true;
-                                break; 
-                            } catch (error) {
-                                // continuar probando
-                            }
-                        }
-
-                        if (found) {
-                            i++;
-                        } else {
-                            keepChecking = false; 
-                        }
-                    }
-                    
-                    // Solo actualizar si se encontraron imágenes locales reales
-                    if (foundImages.length > 0) {
-                        setImages(foundImages);
-                    }
-                };
-                checkImages();
-            }, [folder, filePrefix]);
+            // Si no hay imágenes, no renderizamos nada
+            if (!images || images.length === 0) return null;
 
             const slideCount = images.length;
             const theta = slideCount > 0 ? 360 / slideCount : 0;
@@ -593,6 +534,7 @@
                 const calculateRadius = () => {
                     let baseRadius = window.innerWidth / 2;
                     if (slideCount > 0) {
+                        // Cálculo dinámico para que no se amontonen si hay muchas
                         const minRadiusForImages = (slideCount * 300) / (2 * Math.PI) * 1.1;
                         baseRadius = Math.max(baseRadius, minRadiusForImages, 340);
                     } else {
@@ -614,9 +556,6 @@
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
-
-            // Seguridad extra: si por alguna razón no hay imágenes, no mostrar nada, pero con defaults esto raramente pasará
-            if (slideCount === 0) return null;
 
             return (
                 <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle }}>
@@ -657,6 +596,52 @@
             );
         };
 
+        // --- VIDEO CARD (Lazy Load para iPhone) ---
+        const VideoCard = ({ id, index }) => {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const thumbnailUrl = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+
+            if (isPlaying) {
+                return (
+                    <div className="w-full h-full bg-black">
+                         <iframe 
+                            className="w-full h-full"
+                            src={`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&controls=1&showinfo=0`}
+                            title={`Video Testimonial ${index + 1}`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            referrerPolicy="no-referrer"
+                        ></iframe>
+                    </div>
+                );
+            }
+
+            return (
+                <div 
+                    className="w-full h-full relative cursor-pointer group bg-black"
+                    onClick={() => setIsPlaying(true)}
+                >
+                    <img 
+                        src={thumbnailUrl} 
+                        alt={`Testimonial thumbnail ${index + 1}`} 
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                        loading="lazy"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center pl-1 shadow-xl group-hover:scale-110 transition-transform duration-300 border-2 border-white">
+                            <svg className="w-8 h-8 text-white fill-current" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="absolute bottom-6 left-0 w-full text-center">
+                         <p className="text-white font-bold text-sm bg-black/60 px-4 py-1 inline-block rounded-full backdrop-blur-sm border border-white/20">Ver Testimonio</p>
+                    </div>
+                </div>
+            );
+        };
+
         // Video Testimonials Component (YouTube Shorts)
         const VideoTestimonials = ({ t }) => {
             const videoIds = [
@@ -679,16 +664,7 @@
                         <div className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollBehavior: 'smooth' }}>
                             {videoIds.map((id, index) => (
                                 <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white">
-                                    <iframe 
-                                        className="w-full h-full absolute inset-0"
-                                        src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&controls=1&showinfo=0`}
-                                        title={`Video Testimonial ${index + 1}`}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer"
-                                    ></iframe>
+                                    <VideoCard id={id} index={index} />
                                 </div>
                             ))}
                         </div>
@@ -835,6 +811,16 @@
 
             const t = translations[lang] || translations['es'];
             const heroImage = "./web_images/intro.jpg"; 
+
+            // --- CONFIGURACIÓN DE IMÁGENES (EDITAR AQUÍ) ---
+            // Generamos la lista automáticamente basada en la cantidad exacta que pediste.
+            // Si en el futuro quieres poner nombres aleatorios, puedes borrar esto y poner: const nationalImages = ["./viajes/mi_foto.jpg", ...];
+            
+            // Carpeta 'viajes' (Nacionales): viaje1.jpeg hasta viaje45.jpeg
+            const nationalImages = Array.from({length: 45}, (_, i) => `./viajes/viaje${i+1}.jpeg`);
+            
+            // Carpeta 'viajes_int' (Internacionales): viaje1.jpeg hasta viaje28.jpeg
+            const internationalImages = Array.from({length: 28}, (_, i) => `./viajes_int/viaje${i+1}.jpeg`);
             
             const scrollToSection = (id) => {
                 const element = document.getElementById(id);
@@ -851,8 +837,7 @@
                     {/* SECCIÓN NACIONAL */}
                     <Carousel3D 
                         id="destacados"
-                        folder="viajes"
-                        filePrefix="viaje"
+                        images={nationalImages}
                         badge={t.national.badge}
                         title={t.national.title}
                         subtitleStart={t.national.subtitle}
@@ -866,8 +851,7 @@
                     {/* SECCIÓN INTERNACIONAL */}
                     <Carousel3D 
                         id="internacionales"
-                        folder="viajes_int" 
-                        filePrefix="viaje"
+                        images={internationalImages}
                         badge={t.international.badge}
                         title={t.international.title}
                         subtitleStart={t.international.subtitle}
