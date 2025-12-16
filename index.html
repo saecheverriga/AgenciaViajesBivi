@@ -518,7 +518,23 @@
         const Carousel3D = ({ id, folder, filePrefix, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection, clickHint }) => {
             const [angle, setAngle] = useState(0);
             const [lightboxSrc, setLightboxSrc] = useState(null);
-            const [images, setImages] = useState([]); 
+            
+            // Inicializar con imágenes de respaldo para que la sección siempre sea visible en vivo
+            const defaultImages = folder === 'viajes' ? [
+                "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600", // San Andrés
+                "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=600", // Cartagena
+                "https://images.unsplash.com/photo-1583531352515-8884af319dc1?auto=format&fit=crop&q=80&w=600", // Eje Cafetero
+                "https://images.unsplash.com/photo-1591746200676-4742f1f5492d?auto=format&fit=crop&q=80&w=600", // Tayrona
+                "https://images.unsplash.com/photo-1533630737184-7833055979eb?auto=format&fit=crop&q=80&w=600"  // Guatape
+            ] : [
+                "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600", // Paris
+                "https://images.unsplash.com/photo-1520106212299-d99c443e4568?auto=format&fit=crop&q=80&w=600", // Roma
+                "https://images.unsplash.com/photo-1512453979798-5ea904ac66de?auto=format&fit=crop&q=80&w=600", // Cancun
+                "https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&q=80&w=600", // Venecia
+                "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=600"  // Taj Mahal
+            ];
+
+            const [images, setImages] = useState(defaultImages); 
             const [radius, setRadius] = useState(400); 
 
             useEffect(() => {
@@ -558,13 +574,10 @@
                         }
                     }
                     
-                    if (foundImages.length === 0) {
-                        const fallbackBase = folder === 'viajes' 
-                            ? "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&q=80&w=600"
-                            : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=600";
-                        foundImages.push(fallbackBase, fallbackBase, fallbackBase, fallbackBase, fallbackBase);
+                    // Solo actualizar si se encontraron imágenes locales reales
+                    if (foundImages.length > 0) {
+                        setImages(foundImages);
                     }
-                    setImages(foundImages);
                 };
                 checkImages();
             }, [folder, filePrefix]);
@@ -602,6 +615,7 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [lightboxSrc]); 
 
+            // Seguridad extra: si por alguna razón no hay imágenes, no mostrar nada, pero con defaults esto raramente pasará
             if (slideCount === 0) return null;
 
             return (
