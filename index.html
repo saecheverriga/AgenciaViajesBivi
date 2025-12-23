@@ -87,6 +87,9 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* CLASE MÁGICA PARA SNAP ESTRICTO (Uno por uno) */
+        .snap-always { scroll-snap-stop: always; }
+
         /* --- CARRUSEL 3D --- */
         .carousel-3d-section {
             padding: 40px 0 180px; 
@@ -572,9 +575,15 @@
         };
 
         // --- VIDEO CARD (Optimized) ---
-        const VideoCard = ({ id, index }) => {
+        const VideoCard = ({ id, index, wasDragged }) => {
             const [isPlaying, setIsPlaying] = useState(false);
             const thumbnailUrl = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+
+            const handleClick = (e) => {
+                // Si hubo arrastre, prevenimos el click
+                if (wasDragged.current) return;
+                setIsPlaying(true);
+            };
 
             if (isPlaying) {
                 return (
@@ -595,7 +604,7 @@
             return (
                 <div 
                     className="w-full h-full relative cursor-pointer group bg-black"
-                    onClick={() => setIsPlaying(true)}
+                    onClick={handleClick}
                     role="button"
                     aria-label={`Reproducir video testimonial ${index + 1}`}
                 >
@@ -632,9 +641,41 @@
             // Referencia para controlar el scroll horizontal
             const scrollContainerRef = useRef(null);
 
+            // LOGICA DE ARRASTRE PARA MOUSE (Desktop tactile feel)
+            const [isDown, setIsDown] = useState(false);
+            const [startX, setStartX] = useState(0);
+            const [scrollLeft, setScrollLeft] = useState(0);
+            // Referencia para saber si fue un clic o un arrastre
+            const wasDragged = useRef(false);
+
+            const handleMouseDown = (e) => {
+                setIsDown(true);
+                wasDragged.current = false;
+                setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+                setScrollLeft(scrollContainerRef.current.scrollLeft);
+            };
+
+            const handleMouseLeave = () => {
+                setIsDown(false);
+            };
+
+            const handleMouseUp = () => {
+                setIsDown(false);
+                // Si isDown era true, el click en el hijo se disparará después de esto,
+                // pero ya habremos marcado wasDragged en handleMouseMove si hubo movimiento.
+            };
+
+            const handleMouseMove = (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                wasDragged.current = true; // Marcamos que hubo arrastre
+                const x = e.pageX - scrollContainerRef.current.offsetLeft;
+                const walk = (x - startX) * 2; // Velocidad del scroll
+                scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+            };
+
             const scroll = (direction) => {
                 if (scrollContainerRef.current) {
-                    // Desplaza el ancho de una tarjeta + el espacio (aprox 300px)
                     const scrollAmount = 320; 
                     scrollContainerRef.current.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
                 }
@@ -651,10 +692,8 @@
                             <p className="text-gray-300 max-w-2xl mx-auto">{t.videos.subtitle}</p>
                         </div>
                         
-                        {/* Contenedor relativo para posicionar los botones sobre el carrusel */}
                         <div className="relative group">
                             
-                            {/* Botón Izquierda (NUEVO) */}
                             <button 
                                 onClick={() => scroll(-1)}
                                 className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/30 text-white w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 -ml-4 md:-ml-6 shadow-lg border border-white/20 hidden md:flex"
@@ -667,17 +706,21 @@
 
                             <div 
                                 ref={scrollContainerRef}
-                                className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide" 
-                                style={{ scrollBehavior: 'smooth' }}
+                                className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing" 
+                                style={{ scrollBehavior: 'smooth', touchAction: 'pan-x' }}
+                                onMouseDown={handleMouseDown}
+                                onMouseLeave={handleMouseLeave}
+                                onMouseUp={handleMouseUp}
+                                onMouseMove={handleMouseMove}
                             >
                                 {videoIds.map((id, index) => (
-                                    <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white">
-                                        <VideoCard id={id} index={index} />
+                                    // AQUI AGREGAMOS "snap-always" PARA FORZAR EL 1-POR-1
+                                    <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center snap-always bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white select-none">
+                                        <VideoCard id={id} index={index} wasDragged={wasDragged} />
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Botón Derecha (NUEVO) */}
                             <button 
                                 onClick={() => scroll(1)}
                                 className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/30 text-white w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 -mr-4 md:-mr-6 shadow-lg border border-white/20 hidden md:flex"
