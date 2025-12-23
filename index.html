@@ -477,12 +477,16 @@
             const [radius, setRadius] = useState(400); 
             const [displayImages, setDisplayImages] = useState([]);
 
+            // Referencias para la lógica de arrastre (Drag & Drop)
+            const isDragging = useRef(false);
+            const startX = useRef(0);
+            const currentAngleRef = useRef(0);
+            const wasDragged = useRef(false);
+
             if (!images || images.length === 0) return null;
 
             useEffect(() => {
                 const isMobile = window.innerWidth < 768;
-                // NOTA: Mantenemos este límite para móviles tal como pediste. 
-                // Esto es independiente de la lista completa que verás abajo.
                 if (isMobile && images.length > 15) {
                     setDisplayImages(images.slice(0, 15));
                 } else {
@@ -495,6 +499,68 @@
 
             const rotate = (dir) => {
                 setAngle(prevAngle => prevAngle + (dir * theta));
+            };
+
+            // --- LÓGICA DE ARRASTRE TÁCTIL Y MOUSE ---
+            const handleStart = (clientX) => {
+                isDragging.current = true;
+                wasDragged.current = false;
+                startX.current = clientX;
+                currentAngleRef.current = angle; // Guardamos el ángulo inicial
+            };
+
+            const handleMove = (clientX) => {
+                if (!isDragging.current) return;
+                const diff = clientX - startX.current;
+                
+                // Si se mueve más de 5px, lo consideramos arrastre (para evitar clics falsos)
+                if (Math.abs(diff) > 5) wasDragged.current = true;
+
+                // CAMBIO 1: Dirección corregida (Signo + en vez de -)
+                // CAMBIO 2: Sensibilidad reducida (0.1 en vez de 0.5) para más control
+                const newAngle = currentAngleRef.current + (diff * 0.1); 
+                setAngle(newAngle);
+            };
+
+            const handleEnd = () => {
+                if (!isDragging.current) return;
+                isDragging.current = false;
+
+                // CAMBIO 3: Lógica "Uno a Uno" estricta
+                // Calculamos cuánto se movió el ángulo desde que empezamos a arrastrar
+                const diffAngle = angle - currentAngleRef.current;
+                
+                // Definimos un umbral: si moviste más de 1/3 del espacio de una foto, cambiamos.
+                const threshold = theta / 3;
+
+                if (Math.abs(diffAngle) > threshold) {
+                    // Determinamos la dirección basada en el movimiento
+                    const direction = diffAngle > 0 ? 1 : -1;
+                    
+                    // Forzamos a que solo se mueva 1 espacio (theta) desde la posición original
+                    // Esto evita que salte 2, 3 o más fotos de golpe.
+                    setAngle(currentAngleRef.current + (direction * theta));
+                } else {
+                    // Si no moviste suficiente, regresa a la foto original (efecto rebote)
+                    setAngle(currentAngleRef.current);
+                }
+            };
+
+            // Manejadores unificados de eventos
+            const onMouseDown = (e) => handleStart(e.clientX);
+            const onMouseMove = (e) => handleMove(e.clientX);
+            const onMouseUp = () => handleEnd();
+            const onMouseLeave = () => handleEnd();
+
+            const onTouchStart = (e) => handleStart(e.touches[0].clientX);
+            const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+            const onTouchEnd = () => handleEnd();
+
+            const handleImageClick = (src) => {
+                // Solo abrimos la foto si NO estábamos arrastrando
+                if (!wasDragged.current) {
+                    setLightboxSrc(src);
+                }
             };
 
             useEffect(() => {
@@ -536,14 +602,19 @@
                         )}
                     </div>
 
-                    <div className="carousel-wrapper">
+                    <div 
+                        className="carousel-wrapper cursor-grab active:cursor-grabbing"
+                        onMouseDown={onMouseDown}
+                        onMouseMove={onMouseMove}
+                        onMouseUp={onMouseUp}
+                        onMouseLeave={onMouseLeave}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                    >
                         <div className="carousel-3d" style={{ transform: `translateZ(-${radius}px) rotateY(${angle}deg)` }}>
                             {displayImages.map((src, i) => (
-                                <div key={i} className="slide-3d" style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }} onClick={() => setLightboxSrc(src)}>
-                                    {/* SEO: loading="lazy" retrasa la carga hasta que es necesaria. 
-                                        decoding="async" evita que la decodificación de imagen bloquee el hilo principal.
-                                        width/height previene CLS (saltos de contenido).
-                                    */}
+                                <div key={i} className="slide-3d" style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }} onClick={() => handleImageClick(src)}>
                                     <img 
                                         src={src} 
                                         alt={`${title} - Destino turístico ${i + 1}`} 
@@ -556,8 +627,8 @@
                             ))}
                         </div>
                         <div className="controls-3d">
-                            <button onClick={() => rotate(1)} aria-label="Ver imagen anterior">←</button>
-                            <button onClick={() => rotate(-1)} aria-label="Ver siguiente imagen">→</button>
+                            <button onClick={(e) => { e.stopPropagation(); rotate(1); }} aria-label="Ver imagen anterior">←</button>
+                            <button onClick={(e) => { e.stopPropagation(); rotate(-1); }} aria-label="Ver siguiente imagen">→</button>
                         </div>
                         <p className="absolute -bottom-[130px] w-full text-center text-cyan-200/80 text-sm font-light tracking-wide pointer-events-none z-10">
                             {clickHint}
