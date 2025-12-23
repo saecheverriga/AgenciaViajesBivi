@@ -221,7 +221,7 @@
                     subtitle: "¿Tienes dudas o quieres una cotización rápida? La forma más ágil de contactarme es por WhatsApp. Estoy lista para asesorarte.",
                     btn_chat: "Chatear con Biviana",
                     contact_direct: "O contáctame directamente:",
-                    form_title: "Solicitud Formal",
+                    form_title: "Formal Request",
                     form_desc: "Si aun no estas seguro del destino y solo tienes una idea, perfecto!, deja tus datos y te contacto cuanto antes para brindarte toda la información que necesites.",
                     advisor: "Tu asesora de confianza: Biviana"
                 },
@@ -478,6 +478,8 @@
 
             useEffect(() => {
                 const isMobile = window.innerWidth < 768;
+                // NOTA: Mantenemos este límite para móviles tal como pediste. 
+                // Esto es independiente de la lista completa que verás abajo.
                 if (isMobile && images.length > 15) {
                     setDisplayImages(images.slice(0, 15));
                 } else {
@@ -651,38 +653,29 @@
 
         // About
         const About = ({ t }) => (
-            <section id="nosotros" className="py-24 bg-orange-50">
+            // CAMBIO: Usamos un degradado sutil de blanco a cian muy claro para dar sensación de "Viento Fresco"
+            <section id="nosotros" className="py-16 bg-gradient-to-b from-white to-cyan-50 relative">
+                
                 <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center gap-16">
-                        <div className="md:w-1/2 relative">
-                            <div className="absolute -top-4 -left-4 w-24 h-24 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                            <div className="absolute -bottom-8 -right-4 w-32 h-32 bg-cyan-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                    <div className="max-w-3xl mx-auto text-center">
+                        <span className="text-cyan-600 font-bold tracking-widest text-xs uppercase mb-2 block">{t.about.badge}</span>
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-8">{t.about.title}</h2>
+                        
+                        {/* Tarjeta con sombra suave y borde muy sutil */}
+                        <div className="bg-white p-8 md:p-10 rounded-2xl shadow-lg shadow-cyan-100/50 border border-white relative overflow-hidden">
                             
-                            <img 
-                                src="./web_images/acercade_pic.jpg" 
-                                alt="Equipo Viento Fresco y Biviana Asesora" 
-                                className="rounded-2xl shadow-2xl z-10 relative transform rotate-1 hover:rotate-0 transition duration-500 border-4 border-white"
-                                loading="lazy"
-                                width="600"
-                                height="400"
-                            />
+                            {/* Pequeño detalle decorativo en la esquina */}
+                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-cyan-50 opacity-50 blur-xl"></div>
+
+                            <div className="prose text-slate-600 mx-auto leading-relaxed text-base relative z-10">
+                                <p className="mb-4" dangerouslySetInnerHTML={{ __html: t.about.p1 }}></p>
+                                <p dangerouslySetInnerHTML={{ __html: t.about.p2 }}></p>
+                            </div>
                             
-                            <div className="absolute -bottom-6 -right-6 bg-teal-600 text-white p-6 rounded-xl shadow-xl hidden md:block z-20">
-                                <p className="text-3xl font-bold">19+</p>
-                                <p className="text-sm">{t.about.years}</p>
-                            </div>
-                        </div>
-                        <div className="md:w-1/2">
-                            <span className="text-orange-500 font-bold tracking-widest text-sm uppercase mb-2 block">{t.about.badge}</span>
-                            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8">{t.about.title}</h2>
-                            <div className="prose prose-lg text-gray-600">
-                                <p className="mb-6 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: t.about.p1 }}></p>
-                                <p className="leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: t.about.p2 }}></p>
-                            </div>
-                            <div className="mt-8 flex items-center gap-4">
-                                <div className="h-px w-20 bg-orange-300"></div>
-                                <Heart className="text-orange-400 fill-current w-6 h-6" />
-                                <div className="h-px w-20 bg-orange-300"></div>
+                            <div className="mt-8 flex items-center justify-center gap-4 opacity-70">
+                                <div className="h-px w-12 bg-gradient-to-r from-transparent to-cyan-300"></div>
+                                <Heart className="text-red-500 fill-current w-4 h-4 animate-pulse" />
+                                <div className="h-px w-12 bg-gradient-to-l from-transparent to-cyan-300"></div>
                             </div>
                         </div>
                     </div>
@@ -789,9 +782,88 @@
             const t = translations[lang] || translations['es'];
             const heroImage = "./web_images/intro.jpg"; 
 
-            // Memoizamos las listas de imágenes para evitar re-calculos innecesarios
-            const nationalImages = useMemo(() => Array.from({length: 45}, (_, i) => `./viajes/viaje${i+1}.jpeg`), []);
-            const internationalImages = useMemo(() => Array.from({length: 28}, (_, i) => `./viajes_int/viaje${i+1}.jpeg`), []);
+            // --- LISTAS MAESTRAS DE IMÁGENES (Editables manualmente) ---
+            // Aquí puedes agregar, borrar o cambiar el nombre de archivos específicos.
+            // Para cambiar una imagen, reemplaza el texto entre comillas.
+            
+            const nationalImages = useMemo(() => [
+                "./viajes/viaje1.jpeg",
+                "./viajes/viaje2.jpeg",
+                "./viajes/viaje3.jpeg",
+                "./viajes/viaje4.jpeg",
+                "./viajes/viaje5.jpeg",
+                "./viajes/viaje6.jpeg",
+                "./viajes/viaje7.jpeg",
+                "./viajes/viaje8.jpeg",
+                "./viajes/viaje9.jpeg",
+                "./viajes/viaje10.jpeg",
+                "./viajes/viaje11.jpeg",
+                "./viajes/viaje12.jpeg",
+                "./viajes/viaje13.jpeg",
+                "./viajes/viaje14.jpeg",
+                "./viajes/viaje15.jpeg",
+                "./viajes/viaje16.jpeg",
+                "./viajes/viaje17.jpeg",
+                "./viajes/viaje18.jpeg",
+                "./viajes/viaje19.jpeg",
+                "./viajes/viaje20.jpeg",
+                "./viajes/viaje21.jpeg",
+                "./viajes/viaje22.jpeg",
+                "./viajes/viaje23.jpeg",
+                "./viajes/viaje24.jpeg",
+                "./viajes/viaje25.jpeg",
+                "./viajes/viaje26.jpeg",
+                "./viajes/viaje27.jpeg",
+                "./viajes/viaje28.jpeg",
+                "./viajes/viaje29.jpeg",
+                "./viajes/viaje30.jpeg",
+                "./viajes/viaje31.jpeg",
+                "./viajes/viaje32.jpeg",
+                "./viajes/viaje33.jpeg",
+                "./viajes/viaje34.jpeg",
+                "./viajes/viaje35.jpeg",
+                "./viajes/viaje36.jpeg",
+                "./viajes/viaje37.jpeg",
+                "./viajes/viaje38.jpeg",
+                "./viajes/viaje39.jpeg",
+                "./viajes/viaje40.jpeg",
+                "./viajes/viaje41.jpeg",
+                "./viajes/viaje42.jpeg",
+                "./viajes/viaje43.jpeg",
+                "./viajes/viaje44.jpeg",
+                "./viajes/viaje45.jpeg"
+            ], []);
+
+            const internationalImages = useMemo(() => [
+                "./viajes_int/viaje1.jpeg",
+                "./viajes_int/viaje2.jpeg",
+                "./viajes_int/viaje3.jpeg",
+                "./viajes_int/viaje4.jpeg",
+                "./viajes_int/viaje5.jpeg",
+                "./viajes_int/viaje6.jpeg",
+                "./viajes_int/viaje7.jpeg",
+                "./viajes_int/viaje8.jpeg",
+                "./viajes_int/viaje9.jpeg",
+                "./viajes_int/viaje10.jpeg",
+                "./viajes_int/viaje11.jpeg",
+                "./viajes_int/viaje12.jpeg",
+                "./viajes_int/viaje13.jpeg",
+                "./viajes_int/viaje14.jpeg",
+                "./viajes_int/viaje15.jpeg",
+                "./viajes_int/viaje16.jpeg",
+                "./viajes_int/viaje17.jpeg",
+                "./viajes_int/viaje18.jpeg",
+                "./viajes_int/viaje19.jpeg",
+                "./viajes_int/viaje20.jpeg",
+                "./viajes_int/viaje21.jpeg",
+                "./viajes_int/viaje22.jpeg",
+                "./viajes_int/viaje23.jpeg",
+                "./viajes_int/viaje24.jpeg",
+                "./viajes_int/viaje25.jpeg",
+                "./viajes_int/viaje26.jpeg",
+                "./viajes_int/viaje27.jpeg",
+                "./viajes_int/viaje28.jpeg"
+            ], []);
             
             const scrollToSection = (id) => {
                 const element = document.getElementById(id);
