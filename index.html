@@ -133,15 +133,25 @@
 
         .controls-3d button:hover { background: rgba(255,255,255,0.3); transform: translateY(-3px); }
 
+        /* LIGHTBOX GLOBAL (Ahora fuera del carrusel) */
         .lightbox-overlay {
             position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.95); z-index: 9999; opacity: 0; animation: fadeIn 0.3s forwards;
+            background: rgba(0,0,0,0.95); z-index: 10000; /* Z-Index muy alto */
+            opacity: 0; animation: fadeIn 0.3s forwards;
+            padding: 20px;
         }
-        .lightbox-image { max-width: 92%; max-height: 90%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+        .lightbox-image { 
+            max-width: 95%; max-height: 90vh; border-radius: 8px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9); 
+            object-fit: contain;
+        }
         .close-lightbox {
-            position: absolute; top: 28px; right: 36px; font-size: 48px; color: white;
-            cursor: pointer; font-weight: 700; line-height: 1; user-select: none; z-index: 10000;
+            position: absolute; top: 20px; right: 30px; font-size: 50px; color: white;
+            cursor: pointer; font-weight: 300; line-height: 1; user-select: none; z-index: 10001;
+            transition: color 0.2s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
+        .close-lightbox:hover { color: #22d3ee; }
 
         @media (max-width: 420px) {
             .carousel-wrapper { width: 260px; height: 462px; }
@@ -468,9 +478,9 @@
         );
 
         // --- COMPONENTE DE CARRUSEL 3D (Lazy Load Optimizado) ---
-        const Carousel3D = ({ id, images, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection, clickHint }) => {
+        // Se agregó la prop onImageClick para manejar la apertura desde el padre
+        const Carousel3D = ({ id, images, badge, title, subtitleStart, linkText, subtitleEnd, backgroundStyle, scrollToSection, clickHint, onImageClick }) => {
             const [angle, setAngle] = useState(0);
-            const [lightboxSrc, setLightboxSrc] = useState(null);
             const [radius, setRadius] = useState(400); 
             const [displayImages, setDisplayImages] = useState([]);
 
@@ -508,14 +518,6 @@
                 return () => window.removeEventListener('resize', calculateRadius);
             }, [slideCount]);
 
-            useEffect(() => {
-                const handleKeyDown = (e) => {
-                    if (lightboxSrc && e.key === 'Escape') setLightboxSrc(null);
-                };
-                window.addEventListener('keydown', handleKeyDown);
-                return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [lightboxSrc]); 
-
             return (
                 <section id={id} className="carousel-3d-section" style={{ background: backgroundStyle }}>
                     <div className="text-center mb-8 px-6">
@@ -534,7 +536,7 @@
                     <div className="carousel-wrapper">
                         <div className="carousel-3d" style={{ transform: `translateZ(-${radius}px) rotateY(${angle}deg)` }}>
                             {displayImages.map((src, i) => (
-                                <div key={i} className="slide-3d" style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }} onClick={() => setLightboxSrc(src)}>
+                                <div key={i} className="slide-3d" style={{ transform: `rotateY(${theta * i}deg) translateZ(${radius}px)` }} onClick={() => onImageClick(src)}>
                                     <img 
                                         src={src} 
                                         alt={`${title} - Destino turístico ${i + 1}`} 
@@ -554,27 +556,14 @@
                             {clickHint}
                         </p>
                     </div>
-
-                    {lightboxSrc && (
-                        <div className="lightbox-overlay" onClick={() => setLightboxSrc(null)}>
-                            <span className="close-lightbox" onClick={() => setLightboxSrc(null)}>×</span>
-                            <img src={lightboxSrc} alt={`Vista ampliada de ${title}`} className="lightbox-image" onClick={(e) => e.stopPropagation()} />
-                        </div>
-                    )}
                 </section>
             );
         };
 
         // --- VIDEO CARD (Optimized) ---
-        const VideoCard = ({ id, index, wasDragged }) => {
+        const VideoCard = ({ id, index }) => {
             const [isPlaying, setIsPlaying] = useState(false);
             const thumbnailUrl = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-
-            const handleClick = (e) => {
-                // Si hubo arrastre, prevenimos el click
-                if (wasDragged.current) return;
-                setIsPlaying(true);
-            };
 
             if (isPlaying) {
                 return (
@@ -595,7 +584,7 @@
             return (
                 <div 
                     className="w-full h-full relative cursor-pointer group bg-black"
-                    onClick={handleClick}
+                    onClick={() => setIsPlaying(true)}
                     role="button"
                     aria-label={`Reproducir video testimonial ${index + 1}`}
                 >
@@ -632,41 +621,9 @@
             // Referencia para controlar el scroll horizontal
             const scrollContainerRef = useRef(null);
 
-            // LOGICA DE ARRASTRE PARA MOUSE (Desktop tactile feel)
-            const [isDown, setIsDown] = useState(false);
-            const [startX, setStartX] = useState(0);
-            const [scrollLeft, setScrollLeft] = useState(0);
-            // Referencia para saber si fue un clic o un arrastre
-            const wasDragged = useRef(false);
-
-            const handleMouseDown = (e) => {
-                setIsDown(true);
-                wasDragged.current = false;
-                setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-                setScrollLeft(scrollContainerRef.current.scrollLeft);
-            };
-
-            const handleMouseLeave = () => {
-                setIsDown(false);
-            };
-
-            const handleMouseUp = () => {
-                setIsDown(false);
-                // Si isDown era true, el click en el hijo se disparará después de esto,
-                // pero ya habremos marcado wasDragged en handleMouseMove si hubo movimiento.
-            };
-
-            const handleMouseMove = (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                wasDragged.current = true; // Marcamos que hubo arrastre
-                const x = e.pageX - scrollContainerRef.current.offsetLeft;
-                const walk = (x - startX) * 2; // Velocidad del scroll
-                scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-            };
-
             const scroll = (direction) => {
                 if (scrollContainerRef.current) {
+                    // Desplaza el ancho de una tarjeta + el espacio (aprox 300px)
                     const scrollAmount = 320; 
                     scrollContainerRef.current.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
                 }
@@ -683,8 +640,10 @@
                             <p className="text-gray-300 max-w-2xl mx-auto">{t.videos.subtitle}</p>
                         </div>
                         
+                        {/* Contenedor relativo para posicionar los botones sobre el carrusel */}
                         <div className="relative group">
                             
+                            {/* Botón Izquierda (NUEVO) */}
                             <button 
                                 onClick={() => scroll(-1)}
                                 className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/30 text-white w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 -ml-4 md:-ml-6 shadow-lg border border-white/20 hidden md:flex"
@@ -697,21 +656,17 @@
 
                             <div 
                                 ref={scrollContainerRef}
-                                className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing" 
-                                style={{ scrollBehavior: 'smooth', touchAction: 'pan-x' }}
-                                onMouseDown={handleMouseDown}
-                                onMouseLeave={handleMouseLeave}
-                                onMouseUp={handleMouseUp}
-                                onMouseMove={handleMouseMove}
+                                className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide" 
+                                style={{ scrollBehavior: 'smooth' }}
                             >
                                 {videoIds.map((id, index) => (
-                                    // AQUI AGREGAMOS "snap-always" PARA FORZAR EL 1-POR-1
-                                    <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center snap-always bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white select-none">
-                                        <VideoCard id={id} index={index} wasDragged={wasDragged} />
+                                    <div key={index} className="flex-shrink-0 w-72 h-[500px] snap-center bg-black rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative group border-4 border-white">
+                                        <VideoCard id={id} index={index} />
                                     </div>
                                 ))}
                             </div>
 
+                            {/* Botón Derecha (NUEVO) */}
                             <button 
                                 onClick={() => scroll(1)}
                                 className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/30 text-white w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 -mr-4 md:-mr-6 shadow-lg border border-white/20 hidden md:flex"
@@ -849,6 +804,8 @@
 
         const App = () => {
             const [lang, setLang] = useState('es');
+            // ESTADO GLOBAL DEL LIGHTBOX (Ahora vive en el componente principal)
+            const [lightboxSrc, setLightboxSrc] = useState(null);
 
             useEffect(() => {
                 const browserLang = navigator.language || navigator.userLanguage;
@@ -861,9 +818,6 @@
             const heroImage = "./web_images/intro.jpg"; 
 
             // --- LISTAS MAESTRAS DE IMÁGENES (Editables manualmente) ---
-            // Aquí puedes agregar, borrar o cambiar el nombre de archivos específicos.
-            // Para cambiar una imagen, reemplaza el texto entre comillas.
-            
             const nationalImages = useMemo(() => [
                 "./viajes/viaje1.jpeg",
                 "./viajes/viaje2.jpeg",
@@ -951,7 +905,7 @@
             };
             
             return (
-                <div className="antialiased">
+                <div className="antialiased relative">
                     <Navbar scrollToSection={scrollToSection} lang={lang} setLang={setLang} t={t} />
                     <Hero scrollToSection={scrollToSection} heroImage={heroImage} t={t} /> 
                     
@@ -966,6 +920,7 @@
                         backgroundStyle="linear-gradient(to bottom, #0f172a, #155e75)" 
                         scrollToSection={scrollToSection}
                         clickHint={t.national.click_hint}
+                        onImageClick={setLightboxSrc} // Pasamos la función del padre
                     />
 
                     <Carousel3D 
@@ -979,6 +934,7 @@
                         backgroundStyle="linear-gradient(to bottom, #1e1b4b, #312e81)" 
                         scrollToSection={scrollToSection}
                         clickHint={t.international.click_hint}
+                        onImageClick={setLightboxSrc} // Pasamos la función del padre
                     />
 
                     <VideoTestimonials t={t} />
@@ -987,6 +943,14 @@
                     <Contact t={t} />
                     <Footer t={t} />
                     <WhatsAppButton />
+
+                    {/* LIGHTBOX GLOBAL - RENDERIZADO FUERA DE TODO */}
+                    {lightboxSrc && (
+                        <div className="lightbox-overlay" onClick={() => setLightboxSrc(null)}>
+                            <span className="close-lightbox" onClick={() => setLightboxSrc(null)}>×</span>
+                            <img src={lightboxSrc} alt="Vista ampliada" className="lightbox-image" onClick={(e) => e.stopPropagation()} />
+                        </div>
+                    )}
                 </div>
             );
         };
