@@ -66,6 +66,8 @@
 
     <style>
         /* Optimización CSS Crítico */
+        /* CAMBIO: Esto evita que el menú fijo tape el título de la sección al hacer scroll */
+        html { scroll-padding-top: 100px; }
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
         
@@ -383,7 +385,10 @@
 
         // Hero Section (SEO Super Optimized: LCP)
         const Hero = ({ scrollToSection, heroImage, t }) => (
-            <header id="hero" className="relative h-screen flex items-center justify-center text-center text-white overflow-hidden">
+            // CAMBIO IMPORTANTE: 
+            // 1. 'min-h-screen' en vez de 'h-screen': Permite que la sección crezca si el celular es pequeño y hay mucho texto.
+            // 2. 'pt-32': Empuja el contenido hacia abajo para que el menú fijo NUNCA tape el badge "Agencia de Viajes".
+            <header id="hero" className="relative min-h-screen flex items-center justify-center text-center text-white overflow-hidden pt-32 pb-20">
                 {/* OPTIMIZACIÓN LCP:
                    En lugar de 'backgroundImage' en CSS, usamos una etiqueta <img> real.
                    Esto permite al navegador descubrir y descargar la imagen mucho antes.
